@@ -2,8 +2,7 @@ package client.main;
 
 import clientcore.ClientMain;
 import engine.GameSimulator;
-import network.ClientNetwork;
-import network.INetwork;
+import util.RandomManager;
 
 public class MainClient {
 	
@@ -23,6 +22,8 @@ public class MainClient {
 	 * when and how.
 	 */
 	public static void main(String[] args) {
+		RandomManager.setSeed(1773484627773L);
+		// RandomManager.randomizeSeed();
 		if (args.length < 3) {
 			GameSimulator.main(args);
 		} else {

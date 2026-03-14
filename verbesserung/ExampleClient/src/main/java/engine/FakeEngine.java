@@ -5,8 +5,11 @@ package engine;
 import java.awt.Point;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Queue;
 import java.util.Random;
 import java.util.Set;
 
@@ -23,6 +26,7 @@ import messagesbase.messagesfromserver.FullMap;
 import messagesbase.messagesfromserver.FullMapNode;
 import messagesbase.messagesfromserver.GameState;
 import messagesbase.messagesfromserver.PlayerState;
+import util.RandomManager;
 
 public class FakeEngine {
     private ETerrain[][] terrainGrid;
@@ -98,7 +102,7 @@ public class FakeEngine {
 
         List<PlayerData> values = new ArrayList<>(players.values());
         if (!values.isEmpty()) {
-            PlayerData pd = values.get(new Random().nextInt(values.size()));
+            PlayerData pd = values.get(RandomManager.getRandom().nextInt(values.size()));
             
             PlayerHalfMap halfMap = pd.halfMapData;
             pd.halfMapData = shiftCoordinates(halfMap);
@@ -132,7 +136,7 @@ public class FakeEngine {
                 .toList();
         List<PlayerHalfMapNode> nodes = new ArrayList<>(half.getMapNodes());
         
-        Random r = new Random();
+        Random r = RandomManager.getRandom();
         PlayerHalfMapNode keep = forts.get(r.nextInt(forts.size()));
         
         for (int i = 0; i < nodes.size(); i++) {
@@ -148,7 +152,7 @@ public class FakeEngine {
     }
 
     private PlayerHalfMap shiftCoordinates(PlayerHalfMap halfMapData){
-        boolean makeSquare = new Random().nextBoolean();
+        boolean makeSquare = RandomManager.getRandom().nextBoolean();
         List<PlayerHalfMapNode> newNodes = new ArrayList<>();
         if (makeSquare) {
             int maxY = halfMapData.getMapNodes().stream().mapToInt(n->n.getY()).max().orElse(0);
@@ -182,7 +186,7 @@ public class FakeEngine {
 
         if (fortNode == null) return null;
 
-        Random r = new Random();
+        Random r = RandomManager.getRandom();
         List<PlayerHalfMapNode> candidates = half.getMapNodes().stream()
                 .filter(n -> n.getTerrain() == ETerrain.Grass)
                 // .filter(n -> Math.abs(n.getX() - fort.getX()) + Math.abs(n.getY() - fort.getY()) <= 3)
@@ -207,8 +211,104 @@ public class FakeEngine {
         return null;
     }
 
+    // private Boolean mapIsConnected(FullMap fullMap) {
+        
+    // }
+
+    // private Boolean mapIsConnected(FullMap fullMap) {
+    //     if (fullMap == null || fullMap.getMapNodes() == null || fullMap.getMapNodes().isEmpty()) {
+    //         return false;
+    //     }
+
+    //     List<FullMapNode> walkables = fullMap.getMapNodes().stream()
+    //             .filter(node -> node.getTerrain() != ETerrain.Water)
+    //             .toList();
+
+    //     if (walkables.isEmpty()) {
+    //         return false;
+    //     }
+
+    //     int maxX = fullMap.getMapNodes().stream()
+    //             .mapToInt(FullMapNode::getX)
+    //             .max()
+    //             .orElse(-1);
+    //     int maxY = fullMap.getMapNodes().stream()
+    //             .mapToInt(FullMapNode::getY)
+    //             .max()
+    //             .orElse(-1);
+
+    //     boolean[][] visited = new boolean[maxX + 1][maxY + 1];
+    //     List<Point> queue = new ArrayList<>();
+
+    //     FullMapNode start = walkables.get(0);
+    //     queue.add(new Point(start.getX(), start.getY()));
+    //     visited[start.getX()][start.getY()] = true;
+
+    //     int connectedCount = 0;
+    //     int index = 0;
+    //     int[][] directions = {{1, 0}, {-1, 0}, {0, 1}, {0, -1}};
+
+    //     while (index < queue.size()) {
+    //         Point current = queue.get(index++);
+    //         connectedCount++;
+
+    //         for (int[] d : directions) {
+    //             int nx = current.x + d[0];
+    //             int ny = current.y + d[1];
+
+    //             if (nx < 0 || nx > maxX || ny < 0 || ny > maxY || visited[nx][ny]) {
+    //                 continue;
+    //             }
+
+    //             for (FullMapNode neighbor : walkables) {
+    //                 if (neighbor.getX() == nx && neighbor.getY() == ny) {
+    //                     visited[nx][ny] = true;
+    //                     queue.add(new Point(nx, ny));
+    //                     break;
+    //                 }
+    //             }
+    //         }
+    //     }
+
+    //     return connectedCount == walkables.size();
+    // }
+
     private Boolean mapIsConnected(FullMap fullMap) {
-        return true;
+        
+        if (fullMap == null || fullMap.getMapNodes() == null || fullMap.getMapNodes().isEmpty()) {
+            return false;
+        }
+
+        List<FullMapNode> walkable = fullMap.getMapNodes().stream()
+                .filter(n -> n.getTerrain() != ETerrain.Water)
+                .toList();
+
+        if (walkable.isEmpty()) {
+            return false;
+        }
+
+        Set<FullMapNode> visited = new HashSet<>();
+        Queue<FullMapNode> queue = new LinkedList<>();
+
+        FullMapNode start = walkable.get(0);
+        queue.add(start);
+        visited.add(start);
+
+        while (!queue.isEmpty()) {
+            FullMapNode current = queue.poll();
+
+            for (FullMapNode node : walkable) {
+                int dx = node.getX() - current.getX();
+                int dy = node.getY() - current.getY();
+
+                if ((dx * dx + dy * dy) == 1 && !visited.contains(node)) {
+                    visited.add(node);
+                    queue.add(node);
+                }
+            }
+        }
+
+        return visited.size() == walkable.size();
     }
     
     private FullMap combineHalfMaps_helper(PlayerHalfMap half1, PlayerHalfMap half2) {
@@ -380,7 +480,7 @@ public class FakeEngine {
         Point enemyPos = pd_enemy.position;
         if(hideEnemy)
         {
-            Random r = new Random();
+            Random r = RandomManager.getRandom();
             enemyPos = new Point(r.nextInt(WIDTH),r.nextInt(HEIGHT));
         }
 

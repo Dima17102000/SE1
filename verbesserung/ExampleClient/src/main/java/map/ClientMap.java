@@ -5,9 +5,11 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
 import java.util.Random;
+
 import messagesbase.messagesfromclient.ETerrain;
 import messagesbase.messagesfromclient.PlayerHalfMap;
 import messagesbase.messagesfromclient.PlayerHalfMapNode;
+import util.RandomManager;
 
 public class ClientMap {
     private final int FORTCOUNT = 1;
@@ -28,7 +30,7 @@ public class ClientMap {
     }
     public PlayerHalfMap generate_old() {
         List<PlayerHalfMapNode> nodes = new ArrayList<>();
-        Random rand = new Random();
+        Random rand = RandomManager.getRandom();
 
         int total = width * height;
         int mingrassCount = (int)Math.floor(total * 0.48);
@@ -109,7 +111,7 @@ public class ClientMap {
     }
     public PlayerHalfMap generate() {
         List<PlayerHalfMapNode> nodes = new ArrayList<>();
-        Random rand = new Random();
+        Random rand = RandomManager.getRandom();
 
         int total = width * height;
         int mingrassCount = (int)Math.floor(total * 0.48);

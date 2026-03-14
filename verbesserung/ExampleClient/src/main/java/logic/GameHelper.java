@@ -179,7 +179,7 @@ public class GameHelper {
             }
         }
 
-        assert !nodesLeft.isEmpty();
+        assert nodesLeft.isEmpty();
     }
 
     private void initializeMapCoordinates() {
