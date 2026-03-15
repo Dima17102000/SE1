@@ -30,8 +30,11 @@ public class StrategyPlannedTour implements IStrategy {
    
     @Override
     public PlayerMove calculateNextMove(GameHelper gameHelper) {
-        Set<FullMapNode> goals = collectGoals(gameHelper);
-        updateBestTour(gameHelper, goals, 25);
+        if(gameHelper.playerRecentlyMoved()) {
+            
+            Set<FullMapNode> goals = collectGoals(gameHelper);
+            updateBestTour(gameHelper, goals, 25);
+        }    
         
         return PlayerMove.of(
             gameHelper.getPlayerId(), 
