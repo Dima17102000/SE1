@@ -4,6 +4,7 @@ package engine;
 
 import java.awt.Point;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -187,15 +188,17 @@ public class FakeEngine {
         if (fortNode == null) return null;
 
         Random r = RandomManager.getRandom();
-        List<PlayerHalfMapNode> candidates = half.getMapNodes().stream()
+        List<PlayerHalfMapNode> nodesList = new ArrayList<>(half.getMapNodes());
+        List<PlayerHalfMapNode> candidates = nodesList.stream()
                 .filter(n -> n.getTerrain() == ETerrain.Grass)
                 // .filter(n -> Math.abs(n.getX() - fort.getX()) + Math.abs(n.getY() - fort.getY()) <= 3)
                 // .filter(n -> !(n.getX() == fort.getX() && n.getY() == fort.getY()))
                 .filter(n->!n.isFortPresent())
+                .sorted(Comparator.comparingInt(n -> n.getX() * nodesList.size() + n.getY()))
                 .toList();
+        
 
         if (candidates.isEmpty()) return null;
-
         PlayerHalfMapNode gold = candidates.get(r.nextInt(candidates.size()));
         return new Point(gold.getX(), gold.getY());
     }
