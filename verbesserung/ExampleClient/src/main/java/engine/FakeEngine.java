@@ -4,7 +4,6 @@ package engine;
 
 import java.awt.Point;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -111,7 +110,7 @@ public class FakeEngine {
         
         for (PlayerData pd: players.values()) {
             PlayerHalfMap half = pd.halfMapData;
-            pd.treasurePosition = addTreasureNearFort(half);
+            pd.treasurePosition = addTreasure(half);
             if (pd.treasurePosition == null) {
                 pd.state = EPlayerGameState.Lost;
                 System.err.println("Could not place Treasuere on the map");
@@ -179,28 +178,49 @@ public class FakeEngine {
         return new PlayerHalfMap(halfMapData.getUniquePlayerID(), newNodes);
     }
 
-    private Point addTreasureNearFort(PlayerHalfMap half) {
-        PlayerHalfMapNode fortNode = half.getMapNodes().stream()
-                .filter(PlayerHalfMapNode::isFortPresent)
-                .findFirst()
-                .orElse(null);
+    // private Point addTreasureNearFort(PlayerHalfMap half) {
+    //     PlayerHalfMapNode fortNode = half.getMapNodes().stream()
+    //             .filter(PlayerHalfMapNode::isFortPresent)
+    //             .findFirst()
+    //             .orElse(null);
 
-        if (fortNode == null) return null;
+    //     if (fortNode == null) return null;
 
-        Random r = RandomManager.getRandom();
-        List<PlayerHalfMapNode> nodesList = new ArrayList<>(half.getMapNodes());
-        List<PlayerHalfMapNode> candidates = nodesList.stream()
-                .filter(n -> n.getTerrain() == ETerrain.Grass)
-                // .filter(n -> Math.abs(n.getX() - fort.getX()) + Math.abs(n.getY() - fort.getY()) <= 3)
-                // .filter(n -> !(n.getX() == fort.getX() && n.getY() == fort.getY()))
-                .filter(n->!n.isFortPresent())
-                .sorted(Comparator.comparingInt(n -> n.getX() * nodesList.size() + n.getY()))
-                .toList();
+    //     Random r = RandomManager.getRandom();
+    //     List<PlayerHalfMapNode> nodesList = new ArrayList<>(half.getMapNodes());
+    //     List<PlayerHalfMapNode> candidates = nodesList.stream()
+    //             .filter(n -> n.getTerrain() == ETerrain.Grass)
+    //             // .filter(n -> Math.abs(n.getX() - fort.getX()) + Math.abs(n.getY() - fort.getY()) <= 3)
+    //             // .filter(n -> !(n.getX() == fort.getX() && n.getY() == fort.getY()))
+    //             .filter(n->!n.isFortPresent())
+    //             .sorted(Comparator.comparingInt(n -> n.getX() * nodesList.size() + n.getY()))
+    //             .toList();
         
 
-        if (candidates.isEmpty()) return null;
-        PlayerHalfMapNode gold = candidates.get(r.nextInt(candidates.size()));
-        return new Point(gold.getX(), gold.getY());
+    //     if (candidates.isEmpty()) return null;
+    //     PlayerHalfMapNode gold = candidates.get(r.nextInt(candidates.size()));
+    //     return new Point(gold.getX(), gold.getY());
+    // }
+    private Point addTreasure(PlayerHalfMap half) {
+        PlayerHalfMapNode fort = findFort(half);
+        if (fort == null) return null;
+        List<PlayerHalfMapNode> candidates = collectTreasureCandidates(half, fort);
+        PlayerHalfMapNode chosen = RandomManager.chooseRandom(candidates);
+        return chosen == null ? null : new Point(chosen.getX(), chosen.getY());
+    }
+    
+    private PlayerHalfMapNode findFort(PlayerHalfMap half) {
+        return half.getMapNodes().stream()
+            .filter(PlayerHalfMapNode::isFortPresent)
+            .findFirst()
+            .orElse(null);
+    }
+    
+    private List<PlayerHalfMapNode> collectTreasureCandidates(PlayerHalfMap half, PlayerHalfMapNode fort) {
+        return half.getMapNodes().stream()
+            .filter(n -> n.getTerrain() == ETerrain.Grass)
+            .filter(n -> !n.isFortPresent())
+            .toList();
     }
 
 
