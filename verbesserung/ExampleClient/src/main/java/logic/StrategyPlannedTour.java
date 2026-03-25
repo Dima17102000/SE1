@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -18,6 +19,7 @@ import messagesbase.messagesfromserver.EFortState;
 import messagesbase.messagesfromserver.ETreasureState;
 import messagesbase.messagesfromserver.FullMap;
 import messagesbase.messagesfromserver.FullMapNode;
+import util.RandomManager;
 
 public class StrategyPlannedTour implements IStrategy {
 
@@ -233,7 +235,8 @@ public class StrategyPlannedTour implements IStrategy {
         */
         // List<FullMapNode> goals = new ArrayList<>();
         // return goals;
-        Set<FullMapNode> goals = new HashSet<>();
+        // Set<FullMapNode> goals = new HashSet<>();
+        Set<FullMapNode> goals = new LinkedHashSet<>();
         boolean hasTreasure = gameHelper.hasTreasure();
         FullMap map = gameHelper.getMap();
 
@@ -301,6 +304,8 @@ public class StrategyPlannedTour implements IStrategy {
             }  
         }
         PriorityQueue<PQItem> pq = new PriorityQueue<>(Comparator.comparingDouble(it -> it.cost));
+
+        
         Map <FullMapNode,Integer> bestCost = new HashMap<>();
         pq.add(new PQItem(start, 0));
         bestCost.put(start,0);
@@ -314,7 +319,8 @@ public class StrategyPlannedTour implements IStrategy {
             }
             
             List <FullMapNode> nbs = gameHelper.getNeighbours4(cur.node);
-            Collections.shuffle(nbs);
+            // Collections.shuffle(nbs,RandomManager.getRandom());
+            Collections.shuffle(nbs,RandomManager.getRandom());
 
             for(FullMapNode nb: nbs)
             {
@@ -353,6 +359,8 @@ public class StrategyPlannedTour implements IStrategy {
         }
         
         PriorityQueue<PQItem> pq = new PriorityQueue<>(Comparator.comparingDouble((it -> it.cost)));
+        
+
         Map<FullMapNode,FullMapNode> parent = new HashMap<>();
         Map<FullMapNode, Double> bestCost = new HashMap<>();
 
@@ -367,7 +375,8 @@ public class StrategyPlannedTour implements IStrategy {
             if (cur.node.equals(finish)) break;
 
             List <FullMapNode> nbs = gameHelper.getNeighbours4(cur.node);
-            Collections.shuffle(nbs);
+            // Collections.shuffle(nbs);
+            Collections.shuffle(nbs,RandomManager.getRandom());
 
             for(FullMapNode nb: nbs)
             {
