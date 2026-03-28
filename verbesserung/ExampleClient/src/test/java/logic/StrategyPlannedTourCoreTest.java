@@ -63,27 +63,25 @@ class StrategyPlannedTourCoreTest{
             assertTrue(maxY >= 5 && maxY <= 20);
             
 
-            int mountainX = 1 + r.nextInt(maxX - 2);
-            int mountainY = 1 + r.nextInt(maxY - 2);
-
-            int playerX = mountainX;
-            int playerY = mountainY;
-
+            int playerX,playerY,mountainX,mountainY;
             
 
-            if (r.nextBoolean()) {
-                do{
-                    playerY = r.nextInt(maxY);
-                }while(playerY == mountainY);
-            }
-            else
-            {
-                do {
-                    playerX = r.nextInt(maxX);
-                }while(playerX == mountainX);
-            }
+            boolean doWeApplyShift = r.nextBoolean();
+            int shiftX = doWeApplyShift ? ((maxX == 20) ? 10 :  0) : 0;
+            int shiftY = doWeApplyShift ? ((maxY == 10) ? 5  :  0) : 0; 
 
-          
+            mountainX = 1 + r.nextInt(10 - 2)  + shiftX;
+            mountainY = 1 + r.nextInt(5 - 2)  + shiftY;
+
+            do {
+                if(r.nextBoolean()) {
+                    playerX = r.nextInt(10 - 2) + shiftX;
+                    playerY = mountainY;
+                } else {
+                    playerX = mountainX;
+                    playerY = r.nextInt(5 - 2) + shiftY;
+                }
+            } while(playerX == mountainX && playerY == mountainY);
 
             assertTrue(playerX == mountainX || playerY == mountainY);
             assertTrue(playerX >= 0 && playerX < maxX);
@@ -179,15 +177,26 @@ class StrategyPlannedTourCoreTest{
             int maxX = r.nextBoolean() ? 10 : 20;
             int maxY = 100 / maxX;
 
-            int mountainX = r.nextInt(maxX);
-            int mountainY = r.nextInt(maxY);
+            int playerX, playerY, mountainX, mountainY;
 
-            int playerX, playerY;
+            mountainX = 1 + r.nextInt(10 - 2);
+            mountainY = 1 + r.nextInt(5 - 2);
 
             do {
-                playerX = r.nextInt(maxX);
-                playerY = r.nextInt(maxY);
-            } while (playerX == mountainX && playerY == mountainY);
+                playerX = r.nextInt(10 - 2);
+                playerY = r.nextInt(5 - 2);
+            } while(playerX == mountainX && playerY == mountainY); 
+
+            if(r.nextBoolean()) {
+                if(maxX == 20) {
+                    mountainX += 10;
+                    playerX += 10;
+                } else {
+                    mountainY += 5;
+                    playerY += 5;
+                }
+            }
+            
 
             // === карта ===
             List<FullMapNode> nodes = new ArrayList<>();
