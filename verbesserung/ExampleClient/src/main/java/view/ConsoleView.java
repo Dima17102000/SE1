@@ -1,19 +1,12 @@
 package view;
 
-import java.util.HashSet;
-import java.util.Set;
-
-import messagesbase.UniquePlayerIdentifier;
+import logic.GameHelper;
 import messagesbase.messagesfromclient.ETerrain;
 import messagesbase.messagesfromserver.EFortState;
 import messagesbase.messagesfromserver.EPlayerPositionState;
 import messagesbase.messagesfromserver.ETreasureState;
 import messagesbase.messagesfromserver.FullMap;
 import messagesbase.messagesfromserver.FullMapNode;
-import messagesbase.messagesfromserver.GameState;
-import messagesbase.messagesfromserver.PlayerState;
-
-import logic.GameHelper;
 
 public class ConsoleView {
     public ConsoleView() {}
@@ -74,7 +67,7 @@ public class ConsoleView {
 
         // Terrainanzeige
         ETerrain terrain = node.getTerrain();
-        if(gameHelper.isVisited(node)) {
+        if(gameHelper.isObserved(node)) {
             return switch (terrain) {
                 case ETerrain.Grass -> "🟢";     
                 case ETerrain.Water -> "\uD83D\uDFE6";     

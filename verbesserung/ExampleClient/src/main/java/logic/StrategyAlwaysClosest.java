@@ -208,7 +208,7 @@ public class StrategyAlwaysClosest implements IStrategy{
 
                 if(neighbor.getTerrain() == ETerrain.Mountain) continue;
 
-                if (!gameHelper.isVisited(neighbor)) {
+                if (!gameHelper.isObserved(neighbor)) {
                     if (nx >= x1 && nx < x2 && ny >= y1 && ny < y2)
                         return neighbor;
                 }

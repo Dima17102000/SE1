@@ -22,6 +22,7 @@ import messagesbase.messagesfromserver.PlayerState;
 public class GameHelper {
     private GameState currentGameState;
     private final Set<String> visitedFields = new HashSet<>();
+    private final Set<String> observedFields = new HashSet<>();
     private final UniquePlayerIdentifier playerId;
     private boolean lastHadTreasure = false;
     private String rememberGoldPosition = null;
@@ -69,6 +70,10 @@ public class GameHelper {
         return visitedFields.contains(key(node));
     }
 
+    public boolean isObserved(FullMapNode node) {
+        return observedFields.contains(key(node));
+    }
+    
     public FullMapNode getMyPosition() {
         FullMap map = currentGameState.getMap();
         return map.getMapNodes().stream()
@@ -121,6 +126,8 @@ public class GameHelper {
             if(node.getPlayerPositionState() == EPlayerPositionState.MyPlayerPosition || node.getPlayerPositionState() == EPlayerPositionState.BothPlayerPosition)
             {
                 visitedFields.add(key);
+                observedFields.add(key);
+
                 if(hasTreasureNow && !lastHadTreasure){
                     rememberGoldPosition = key;
                 }
@@ -133,7 +140,7 @@ public class GameHelper {
             
                         if (nx >= 0 && ny >= 0 && nx <= maxX && ny <= maxY) {
                             String neighbourkey = nx + "," + ny;
-                            visitedFields.add(neighbourkey);
+                            observedFields.add(neighbourkey);
                         }
                     }
                 }

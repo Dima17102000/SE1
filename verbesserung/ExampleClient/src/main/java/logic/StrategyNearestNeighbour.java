@@ -174,7 +174,7 @@ public class StrategyNearestNeighbour implements IStrategy {
             // fallback: исследуем чужую половину
             if (goals.isEmpty()) {
                 for (FullMapNode n : map.getMapNodes()) {
-                    if (!helper.isVisited(n) &&
+                    if (!helper.isObserved(n) &&
                         n.getTerrain() != ETerrain.Water && n.getTerrain() != ETerrain.Mountain &&
                         insideEnemy(n)
                     ) {
@@ -188,7 +188,7 @@ public class StrategyNearestNeighbour implements IStrategy {
                 .forEach(goals::add);
             if (goals.isEmpty()) {
                 for (FullMapNode n : map.getMapNodes()) {
-                    if (!helper.isVisited(n) &&
+                    if (!helper.isObserved(n) &&
                         n.getTerrain() != ETerrain.Water && n.getTerrain() != ETerrain.Mountain &&
                         insideMine(n)
                     ) {
