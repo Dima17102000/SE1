@@ -20,6 +20,8 @@ import messagesbase.messagesfromserver.PlayerState;
 
 
 public class GameHelper {
+    private Boolean DEBUG = false;
+
     private GameState currentGameState;
     private final Set<String> visitedFields = new HashSet<>();
     private final Set<String> observedFields = new HashSet<>();
@@ -36,7 +38,7 @@ public class GameHelper {
     private int enemyYmin;
     private int enemyYmax;
     private boolean isInitialized = false;
-
+    
     private List<Point> playerPosHistory = new ArrayList<>();
     
 
@@ -44,6 +46,10 @@ public class GameHelper {
         this.playerId = playerId;
     }
 
+    public GameHelper(UniquePlayerIdentifier playerId, Boolean debug) {
+        this.playerId = playerId;
+        this.DEBUG = debug;
+    }
     public UniquePlayerIdentifier getPlayerId() {
         return playerId;
     }
@@ -153,7 +159,10 @@ public class GameHelper {
         if(isInitialized)
             return;
 
-        checkAllNodesAreReachable();
+        if(!DEBUG)
+        {
+            checkAllNodesAreReachable();
+        }
         initializeMapCoordinates();
 
         isInitialized = true;
