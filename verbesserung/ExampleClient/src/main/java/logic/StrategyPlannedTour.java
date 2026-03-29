@@ -36,7 +36,7 @@ public class StrategyPlannedTour implements IStrategy {
             
             Set<FullMapNode> goals = collectGoals(gameHelper);
             updateBestTour(gameHelper, goals, 25);
-        }    
+        }
         
         return PlayerMove.of(
             gameHelper.getPlayerId(), 
@@ -126,7 +126,7 @@ public class StrategyPlannedTour implements IStrategy {
             cumulativeCost += terrainTransitionCost(from, to);
 
             // reward = 1 если клетка новая
-            if (goals.contains(to) && !visited.contains(to) && to.getTerrain() != ETerrain.Mountain)
+            if (goals.contains(to) && !visited.contains(to) && to.getTerrain() == ETerrain.Grass)
             {
                 score += Math.pow(gamma, cumulativeCost);
                 visited.add(to);
@@ -149,9 +149,12 @@ public class StrategyPlannedTour implements IStrategy {
                     int steps = dxAbs + dyAbs;
 
                     int extraSteps = 3 + 2 * (steps - 1);
-                   
-                    score += Math.pow(gamma, cumulativeCost + extraSteps);
-                    visited.add(neighbour);
+                    
+                    if(!visited.contains(neighbour) && neighbour.getTerrain() == ETerrain.Grass)
+                    {
+                        score += Math.pow(gamma, cumulativeCost + extraSteps);
+                        visited.add(neighbour);
+                    }
                 }    
             }    
         }
@@ -188,7 +191,7 @@ public class StrategyPlannedTour implements IStrategy {
             cumulativeCost += terrainTransitionCost(from, to);
 
             // reward = 1 если клетка новая
-            if (goals.contains(to) && !visited.contains(to) && to.getTerrain() != ETerrain.Mountain)
+            if (goals.contains(to) && !visited.contains(to) && to.getTerrain() == ETerrain.Grass)
             {
                 score += Math.pow(gamma, cumulativeCost);
                 visited.add(to);
@@ -205,7 +208,7 @@ public class StrategyPlannedTour implements IStrategy {
 
                     if(dx * dx + dy * dy > 2) continue;
 
-                    if(!visited.contains(neighbour))
+                    if(!visited.contains(neighbour) && neighbour.getTerrain() == ETerrain.Grass)
                     {
                         List<FullMapNode> path = continiousPathBFS(to, neighbour, gameHelper, goals);
 
@@ -239,14 +242,14 @@ public class StrategyPlannedTour implements IStrategy {
         Set<FullMapNode> goals = new LinkedHashSet<>();
         boolean hasTreasure = gameHelper.hasTreasure();
         FullMap map = gameHelper.getMap();
-
-       if (hasTreasure) {
+       
+        if (hasTreasure) {
             // искать замок на чужой стороне
             map.getMapNodes().stream()
                 .filter(n -> n.getFortState() == EFortState.EnemyFortPresent)
                 .forEach(goals::add);
-            // fallback: исследуем чужую половину
-            if (goals.isEmpty()) {
+                // fallback: исследуем чужую половину
+                if (goals.isEmpty()) {
                 for (FullMapNode n : map.getMapNodes()) {
                     if (!gameHelper.isVisited(n) &&
                         n.getTerrain() != ETerrain.Water && n.getTerrain() != ETerrain.Mountain &&
@@ -269,8 +272,8 @@ public class StrategyPlannedTour implements IStrategy {
                         goals.add(n);
                     }
                 }
-            }
-            
+            }   
+       
         }
         System.out.print("Goals collected: ");
         for (FullMapNode g: goals) {
@@ -313,7 +316,7 @@ public class StrategyPlannedTour implements IStrategy {
         while(!pq.isEmpty())
         {
             PQItem cur = pq.poll();
-            if(goals.contains(cur.node) && !gameHelper.isVisited(cur.node))
+            if(goals.contains(cur.node))
             {
                 return cur.node;
             }
