@@ -89,7 +89,7 @@ class StrategyPlannedTourUtilsTest {
         Set<PlayerState> players = Set.of(new PlayerState("Test","Player","u123456",EPlayerGameState.MustWait,new UniquePlayerIdentifier("player1"),false));
         FullMap map = new FullMap(nodes);
         GameState gamestate = new GameState(map,players,"ABC");
-        GameHelper helper = new GameHelper(new UniquePlayerIdentifier("player1"));
+        GameHelper helper = new GameHelper(new UniquePlayerIdentifier("player1"),true);
         helper.update(gamestate);
         // GameHelper helper = mock(GameHelper.class);
         // when(helper.getNeighbours4(a)).thenReturn(new ArrayList<>(List.of(b)));
