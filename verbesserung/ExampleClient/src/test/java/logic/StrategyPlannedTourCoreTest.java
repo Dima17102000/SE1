@@ -7,6 +7,7 @@ import java.util.Random;
 import java.util.Set;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.junit.jupiter.api.Test;
 
@@ -50,9 +51,8 @@ class StrategyPlannedTourCoreTest{
 
         return helper;
     }
-
     @Test
-    void CharacterMovesTowardsMountains() {
+    public void CharacterMovesTowardsMountains() {
     
         for(int i = 0; i < NUM_TEST_REPEATS; i++)
         {    
@@ -66,20 +66,20 @@ class StrategyPlannedTourCoreTest{
             int playerX,playerY,mountainX,mountainY;
             
 
-            boolean doWeApplyShift = r.nextBoolean();
-            int shiftX = doWeApplyShift ? ((maxX == 20) ? 10 :  0) : 0;
-            int shiftY = doWeApplyShift ? ((maxY == 10) ? 5  :  0) : 0; 
+    
+            int shiftX = (r.nextBoolean() && (maxX == 20)) ? 10 : 0;
+            int shiftY = (r.nextBoolean() && (maxY == 10)) ? 5 : 0; 
 
             mountainX = 1 + r.nextInt(10 - 2)  + shiftX;
             mountainY = 1 + r.nextInt(5 - 2)  + shiftY;
 
             do {
                 if(r.nextBoolean()) {
-                    playerX = r.nextInt(10 - 2) + shiftX;
+                    playerX = r.nextInt(10) + shiftX;
                     playerY = mountainY;
                 } else {
                     playerX = mountainX;
-                    playerY = r.nextInt(5 - 2) + shiftY;
+                    playerY = r.nextInt(5) + shiftY;
                 }
             } while(playerX == mountainX && playerY == mountainY);
 
@@ -167,7 +167,7 @@ class StrategyPlannedTourCoreTest{
 
     
     @Test
-    void BestTourReachesMountainAtOptimalStep() {
+    public void BestTourReachesMountainAtOptimalStep() {
 
         for (int i = 0; i < NUM_TEST_REPEATS; i++) {
 
@@ -183,8 +183,8 @@ class StrategyPlannedTourCoreTest{
             mountainY = 1 + r.nextInt(5 - 2);
 
             do {
-                playerX = r.nextInt(10 - 2);
-                playerY = r.nextInt(5 - 2);
+                playerX = r.nextInt(10);
+                playerY = r.nextInt(5);
             } while(playerX == mountainX && playerY == mountainY); 
 
             if(r.nextBoolean()) {
@@ -252,7 +252,85 @@ class StrategyPlannedTourCoreTest{
         }
     }
 
-    
+    @Test
+    public void ignoreMountain()
+    {
+        for (int i = 0; i < NUM_TEST_REPEATS; i++) {
+
+            Random r = new Random();
+            // int maxX = 5 + r.nextInt(16);
+            // int maxY = 5 + r.nextInt(16);
+            int maxX = r.nextBoolean() ? 10 : 20;
+            int maxY = 100 / maxX;
+
+            int playerX, playerY, mountainX, mountainY;
+
+            mountainX = 0;
+            mountainY = 0;
+
+            do {
+                playerX = r.nextInt(10);
+                playerY = r.nextInt(5);
+            } while(playerX == mountainX && playerY == mountainY); 
+
+            if(r.nextBoolean()) {
+                if(maxX == 20) {
+                    mountainX += 10;
+                    playerX += 10;
+                } else {
+                    mountainY += 5;
+                    playerY += 5;
+                }
+            }
+            
+
+            // === карта ===
+            List<FullMapNode> nodes = new ArrayList<>();
+            FullMapNode mountainNode = null;
+            FullMapNode playerNode = null;
+
+            for (int x = 0; x < maxX; x++) {
+                for (int y = 0; y < maxY; y++) {
+                    ETerrain terrain = ETerrain.Grass;
+                    EPlayerPositionState playerState = EPlayerPositionState.NoPlayerPresent;
+
+                    if (x == mountainX && y == mountainY) {
+                        terrain = ETerrain.Mountain;
+                    }
+                    if (x == playerX && y == playerY) {
+                        playerState = EPlayerPositionState.MyPlayerPosition;
+                    }
+
+                    FullMapNode node = new FullMapNode(
+                        terrain,
+                        playerState,
+                        ETreasureState.NoOrUnknownTreasureState,
+                        EFortState.NoOrUnknownFortState,
+                        x, y
+                    );
+
+                    if (terrain == ETerrain.Mountain) mountainNode = node;
+                    if (playerState == EPlayerPositionState.MyPlayerPosition) playerNode = node;
+
+                    nodes.add(node);
+                }
+            }
+
+            assertTrue(mountainNode != null);
+            assertTrue(playerNode != null);
+
+            FullMap map = new FullMap(nodes);
+            GameHelper helper = generateGameHelper(map);
+
+            StrategyPlannedTour strategy = new StrategyPlannedTour();
+
+            strategy.calculateNextMove(helper);
+            // === получаем тур целей ===
+            List<FullMapNode> tour = strategy.get_plannedTour();
+            // тур должен содержать гору как цель
+            assertFalse(!tour.contains(mountainNode));
+        }
+    }
 
     @Test
     public void TestComputeTourCost_v1()
