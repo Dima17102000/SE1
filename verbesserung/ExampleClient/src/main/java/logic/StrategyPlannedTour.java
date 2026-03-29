@@ -227,6 +227,22 @@ public class StrategyPlannedTour implements IStrategy {
         return score;
     }
 
+    private void addMountainGoals(Set<FullMapNode> goals, FullMap map, GameHelper gameHelper, boolean enemySide) {
+        map.getMapNodes().stream()
+            .filter(n -> !gameHelper.isVisited(n))
+            .filter(n -> n.getTerrain() == ETerrain.Mountain)
+            .filter(n -> enemySide ? gameHelper.insideEnemy(n) : gameHelper.insideMine(n))
+            .forEach(goals::add);
+    }
+
+    private void addGrassGoals(Set<FullMapNode> goals, FullMap map, GameHelper gameHelper, boolean enemySide) {
+        map.getMapNodes().stream()
+            .filter(n -> !gameHelper.isObserved(n))
+            .filter(n -> n.getTerrain() == ETerrain.Grass)
+            .filter(n -> enemySide ? gameHelper.insideEnemy(n) : gameHelper.insideMine(n))
+            .forEach(goals::add);
+    }
+
     private Set<FullMapNode> collectGoals(GameHelper gameHelper){
         /*  
             In order to find gold and enemy castle agent has to explore the map.
@@ -249,32 +265,22 @@ public class StrategyPlannedTour implements IStrategy {
                 .filter(n -> n.getFortState() == EFortState.EnemyFortPresent)
                 .forEach(goals::add);
                 // fallback: исследуем чужую половину
-                if (goals.isEmpty()) {
-                for (FullMapNode n : map.getMapNodes()) {
-                    if (!gameHelper.isVisited(n) &&
-                        n.getTerrain() != ETerrain.Water && n.getTerrain() != ETerrain.Mountain &&
-                        gameHelper.insideEnemy(n)
-                    ) {
-                        goals.add(n);
-                    }
-                }
+                
+            if(goals.isEmpty()) {
+                addMountainGoals(goals, map, gameHelper,true);
+                addGrassGoals(goals, map, gameHelper, true);
             }
         } else {
             map.getMapNodes().stream()
                 .filter(n -> n.getTreasureState() == ETreasureState.MyTreasureIsPresent)
                 .forEach(goals::add);
-            if (goals.isEmpty()) {
-                for (FullMapNode n : map.getMapNodes()) {
-                    if (!gameHelper.isVisited(n) &&
-                        n.getTerrain() != ETerrain.Water && n.getTerrain() != ETerrain.Mountain &&
-                        gameHelper.insideMine(n)
-                    ) {
-                        goals.add(n);
-                    }
-                }
-            }   
-       
+
+            if(goals.isEmpty()) {
+                addMountainGoals(goals, map, gameHelper,false);
+                addGrassGoals(goals, map, gameHelper,false);
+            }
         }
+
         System.out.print("Goals collected: ");
         for (FullMapNode g: goals) {
             System.out.print("(" + g.getX() + ", " + g.getY() + ") ");
