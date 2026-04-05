@@ -82,9 +82,19 @@ public class StrategyPlannedTour implements IStrategy {
             
             // unpdate goals visibility assuming ALL nodes are Grass.
             // Mountains logic is NOT implemented yet
-            for (FullMapNode n : path) {
-                if (goalsRemaining.contains(n)) {
-                    goalsRemaining.remove(n);
+            for (FullMapNode n : path) {  
+                
+                goalsRemaining.remove(n);
+
+                if(n.getTerrain() == ETerrain.Mountain) {
+                    for(FullMapNode g: new HashSet<>(goalsRemaining)) {
+                        int dx = g.getX() - n.getX();
+                        int dy = g.getY() - n.getY();
+
+                        if(g.getTerrain() == ETerrain.Grass && ((dx*dx + dy*dy) == 1)) {
+                            goalsRemaining.remove(g);
+                        }
+                    }
                 }
             }
             path.remove(0);
