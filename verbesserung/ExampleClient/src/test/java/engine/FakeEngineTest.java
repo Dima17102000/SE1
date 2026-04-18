@@ -14,6 +14,3 @@ public class FakeEngineTest {
     }
     
 }
-
-
-//index = 26, gold position(7,0)
