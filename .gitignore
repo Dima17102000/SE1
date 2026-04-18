@@ -10,6 +10,7 @@
 # Java compiled files
 *.class
 hs_err_pid*
+logback.xml
 
 # Gradle directories & wrappers
 .gradle/
@@ -21,6 +22,7 @@ gradle-app.setting
 .settings
 .classpath
 .project
+.vscode
 
 # Log files
 logs
