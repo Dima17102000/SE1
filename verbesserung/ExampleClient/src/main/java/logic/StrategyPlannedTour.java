@@ -78,6 +78,32 @@ public class StrategyPlannedTour implements IStrategy {
         FullMapNode next = anchor;
 
         while (!goalsRemaining.isEmpty()) {
+            while (next != null && next.getTerrain() == ETerrain.Mountain) {
+                    boolean useful = false;
+                    
+                    for (FullMapNode g : goalsRemaining) {
+                        int dx = g.getX() - next.getX();
+                        int dy = g.getY() - next.getY();
+
+                        if (g.getTerrain() == ETerrain.Grass && (dx * dx + dy * dy <= 2)) {
+                            useful = true;
+                            break;
+                        }
+                    }
+
+                if (useful) {
+                    break;
+                }
+
+                goalsRemaining.remove(next);
+                next = closestByBFS(current, goalsRemaining, gameHelper);
+            }
+
+            if(next == null)
+            {
+                break;
+            }
+
             List<FullMapNode> path = continiousPathBFS(current, next, gameHelper, goalsRemaining);
             
             // unpdate goals visibility assuming ALL nodes are Grass.
@@ -91,7 +117,7 @@ public class StrategyPlannedTour implements IStrategy {
                         int dx = g.getX() - n.getX();
                         int dy = g.getY() - n.getY();
 
-                        if(g.getTerrain() == ETerrain.Grass && ((dx*dx + dy*dy) == 1)) {
+                        if(g.getTerrain() == ETerrain.Grass && ((dx*dx + dy*dy)  <= 2)) {
                             goalsRemaining.remove(g);
                         }
                     }
