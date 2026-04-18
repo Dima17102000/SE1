@@ -4,6 +4,7 @@ package engine;
 
 import java.awt.Point;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -38,7 +39,7 @@ public class FakeEngine {
     private static class PlayerData {
         UniquePlayerIdentifier playerId;
         PlayerHalfMap halfMapData;
-
+        
         Point position;
         Point fortPosition;
         Point treasurePosition;
@@ -97,37 +98,54 @@ public class FakeEngine {
         }
     }
 
-    private void generateFullMap(){
+    private void generateFullMap() {
+        FullMap fullMap = null;
+        for(int i = 0; i < 20; i++) {
+
+            fullMap = generateFullMap_helper();
+
+            if(mapIsConnected(fullMap))
+            {
+                createTerrainArray(fullMap);
+                return;
+            }
+        }
+        createTerrainArray(fullMap);
+        //throw new IllegalStateException("Could not generate connected map after 20 attempts");
+    }
+
+
+    private FullMap generateFullMap_helper() {
         assert players.size() == 2 : "Exactly 2 players should be registered to generate the full map.";
 
-        List<PlayerData> values = new ArrayList<>(players.values());
-        if (!values.isEmpty()) {
-            PlayerData pd = values.get(RandomManager.getRandom().nextInt(values.size()));
-            
-            PlayerHalfMap halfMap = pd.halfMapData;
-            pd.halfMapData = shiftCoordinates(halfMap);
-        }
-        
-        for (PlayerData pd: players.values()) {
-            PlayerHalfMap half = pd.halfMapData;
-            pd.treasurePosition = addTreasure(half);
-            if (pd.treasurePosition == null) {
-                pd.state = EPlayerGameState.Lost;
-                System.err.println("Could not place Treasuere on the map");
+        List<PlayerData> shuffledPlayers = new ArrayList<>(players.values());
+        Collections.shuffle(shuffledPlayers, RandomManager.getRandom());
+
+        PlayerData shiftedPlayer = shuffledPlayers.get(0);
+        PlayerData otherPlayer = shuffledPlayers.get(1);
+
+        PlayerHalfMap shiftedHalfMap = shiftCoordinates(shiftedPlayer.halfMapData);
+        PlayerHalfMap otherHalfMap = otherPlayer.halfMapData;
+
+        for (PlayerData pd : players.values()) {
+            PlayerHalfMap currentHalfMap = pd.halfMapData;
+
+            if (pd == shiftedPlayer) {
+                currentHalfMap = shiftedHalfMap;
             }
 
-            PlayerHalfMapNode fortNode = half.getMapNodes().stream()
-                    .filter(PlayerHalfMapNode::isFortPresent)
-                    .findFirst()
-                    .orElse(null);      
+            pd.treasurePosition = addTreasure(currentHalfMap);
+            if (pd.treasurePosition == null) {
+                pd.state = EPlayerGameState.Lost;
+                System.err.println("Could not place Treasure on the map");
+            }
+
+            PlayerHalfMapNode fortNode = findFort(currentHalfMap);
             pd.fortPosition = new Point(fortNode.getX(), fortNode.getY());
-            pd.position = new Point(fortNode.getX(),fortNode.getY());
+            pd.position = new Point(fortNode.getX(), fortNode.getY());
         }
 
-        PlayerHalfMap half1 = values.get(0).halfMapData;
-        PlayerHalfMap half2 = values.get(1).halfMapData;
-        FullMap fullMap = combineHalfMaps(half1, half2);
-        createTerrainArray(fullMap);
+        return combineHalfMaps(shiftedHalfMap, otherHalfMap);
     }
 
     private PlayerHalfMap normalizeFortCount(PlayerHalfMap half) {
@@ -178,29 +196,6 @@ public class FakeEngine {
         return new PlayerHalfMap(halfMapData.getUniquePlayerID(), newNodes);
     }
 
-    // private Point addTreasureNearFort(PlayerHalfMap half) {
-    //     PlayerHalfMapNode fortNode = half.getMapNodes().stream()
-    //             .filter(PlayerHalfMapNode::isFortPresent)
-    //             .findFirst()
-    //             .orElse(null);
-
-    //     if (fortNode == null) return null;
-
-    //     Random r = RandomManager.getRandom();
-    //     List<PlayerHalfMapNode> nodesList = new ArrayList<>(half.getMapNodes());
-    //     List<PlayerHalfMapNode> candidates = nodesList.stream()
-    //             .filter(n -> n.getTerrain() == ETerrain.Grass)
-    //             // .filter(n -> Math.abs(n.getX() - fort.getX()) + Math.abs(n.getY() - fort.getY()) <= 3)
-    //             // .filter(n -> !(n.getX() == fort.getX() && n.getY() == fort.getY()))
-    //             .filter(n->!n.isFortPresent())
-    //             .sorted(Comparator.comparingInt(n -> n.getX() * nodesList.size() + n.getY()))
-    //             .toList();
-        
-
-    //     if (candidates.isEmpty()) return null;
-    //     PlayerHalfMapNode gold = candidates.get(r.nextInt(candidates.size()));
-    //     return new Point(gold.getX(), gold.getY());
-    // }
     private Point addTreasure(PlayerHalfMap half) {
         PlayerHalfMapNode fort = findFort(half);
         if (fort == null) return null;
@@ -222,79 +217,6 @@ public class FakeEngine {
             .filter(n -> !n.isFortPresent())
             .toList();
     }
-
-
-    private FullMap combineHalfMaps(PlayerHalfMap half1, PlayerHalfMap half2) {
-        for (int i = 0; i < 20; i++) {
-            FullMap fullMap = combineHalfMaps_helper(half1, half2);
-            if (mapIsConnected(fullMap)) {
-                return fullMap;
-            }
-        }
-        return null;
-    }
-
-    // private Boolean mapIsConnected(FullMap fullMap) {
-        
-    // }
-
-    // private Boolean mapIsConnected(FullMap fullMap) {
-    //     if (fullMap == null || fullMap.getMapNodes() == null || fullMap.getMapNodes().isEmpty()) {
-    //         return false;
-    //     }
-
-    //     List<FullMapNode> walkables = fullMap.getMapNodes().stream()
-    //             .filter(node -> node.getTerrain() != ETerrain.Water)
-    //             .toList();
-
-    //     if (walkables.isEmpty()) {
-    //         return false;
-    //     }
-
-    //     int maxX = fullMap.getMapNodes().stream()
-    //             .mapToInt(FullMapNode::getX)
-    //             .max()
-    //             .orElse(-1);
-    //     int maxY = fullMap.getMapNodes().stream()
-    //             .mapToInt(FullMapNode::getY)
-    //             .max()
-    //             .orElse(-1);
-
-    //     boolean[][] visited = new boolean[maxX + 1][maxY + 1];
-    //     List<Point> queue = new ArrayList<>();
-
-    //     FullMapNode start = walkables.get(0);
-    //     queue.add(new Point(start.getX(), start.getY()));
-    //     visited[start.getX()][start.getY()] = true;
-
-    //     int connectedCount = 0;
-    //     int index = 0;
-    //     int[][] directions = {{1, 0}, {-1, 0}, {0, 1}, {0, -1}};
-
-    //     while (index < queue.size()) {
-    //         Point current = queue.get(index++);
-    //         connectedCount++;
-
-    //         for (int[] d : directions) {
-    //             int nx = current.x + d[0];
-    //             int ny = current.y + d[1];
-
-    //             if (nx < 0 || nx > maxX || ny < 0 || ny > maxY || visited[nx][ny]) {
-    //                 continue;
-    //             }
-
-    //             for (FullMapNode neighbor : walkables) {
-    //                 if (neighbor.getX() == nx && neighbor.getY() == ny) {
-    //                     visited[nx][ny] = true;
-    //                     queue.add(new Point(nx, ny));
-    //                     break;
-    //                 }
-    //             }
-    //         }
-    //     }
-
-    //     return connectedCount == walkables.size();
-    // }
 
     private Boolean mapIsConnected(FullMap fullMap) {
         
@@ -334,7 +256,7 @@ public class FakeEngine {
         return visited.size() == walkable.size();
     }
     
-    private FullMap combineHalfMaps_helper(PlayerHalfMap half1, PlayerHalfMap half2) {
+    private FullMap combineHalfMaps(PlayerHalfMap half1, PlayerHalfMap half2) {
         List<PlayerHalfMapNode> combinedNodes = new ArrayList<>();
         combinedNodes.addAll(half1.getMapNodes());
         combinedNodes.addAll(half2.getMapNodes());
