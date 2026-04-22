@@ -91,28 +91,20 @@ public class GameSimulator {
 
         while (true) {
             GameState state_1 = engine.getState(playerId_1);
+            GameState state_2 = engine.getState(playerId_2);
             
             helper_1.update(state_1);
+            helper_2.update(state_2);
             view.render(helper_1);
-            
+
             if (engine.isFinished()) {
                 break;
             }
-
+            
             PlayerMove move_1 = strategy_1.calculateNextMove(helper_1);
             engine.applyMove(move_1);
-
-
-            GameState state_2 = engine.getState(playerId_2);
-            
-            helper_2.update(state_2);
-            
             PlayerMove move_2 = strategy_2.calculateNextMove(helper_2);
             engine.applyMove(move_2);
-            
-            // if (engine.isFinished()) {
-            //     break;
-            // }
         }
 
         if (engine.playerHasWon(playerId_1)) {
