@@ -40,7 +40,7 @@ public class GameHelper {
     private boolean isInitialized = false;
     
     private List<Point> playerPosHistory = new ArrayList<>();
-    
+    private List<Point> enemyPosHistory = new ArrayList<>();
 
     public GameHelper(UniquePlayerIdentifier playerId) {
         this.playerId = playerId;
@@ -86,6 +86,19 @@ public class GameHelper {
                 .filter(n -> n.getPlayerPositionState() == EPlayerPositionState.BothPlayerPosition || n.getPlayerPositionState() == EPlayerPositionState.MyPlayerPosition)
                 .findFirst().orElse(null);
     }
+    public FullMapNode getEnemyPosition() {
+        FullMap map = currentGameState.getMap();
+        return map.getMapNodes().stream()
+                .filter(n -> n.getPlayerPositionState() == EPlayerPositionState.BothPlayerPosition || n.getPlayerPositionState() == EPlayerPositionState.EnemyPlayerPosition)
+                .findFirst().orElse(null);
+    }
+    
+    public Point getFirstTrueEnemyPosition() {
+        if(enemyPosHistory.size() > 8) {
+            return enemyPosHistory.get(8);
+        }
+        return null;
+    }
 
     public boolean goldWasHere(FullMapNode node) {
         return rememberGoldPosition != null && key(node).equals(rememberGoldPosition);
@@ -114,11 +127,17 @@ public class GameHelper {
         return !current.equals(previous);
     }
 
+    private void updatePositions() {
+        Point currentPlayerPos = new Point(getMyPosition().getX(),getMyPosition().getY());
+        playerPosHistory.add(currentPlayerPos);
+        Point enemyPlayerPos = new Point(getEnemyPosition().getX(),getEnemyPosition().getY());
+        enemyPosHistory.add(enemyPlayerPos);
+    }
+
     public void update(GameState gameState) {
         currentGameState = gameState;
         initialize();
-        Point currentPlayerPos = new Point(getMyPosition().getX(),getMyPosition().getY());
-        playerPosHistory.add(currentPlayerPos);
+        updatePositions();
         FullMap map = gameState.getMap();
         boolean hasTreasureNow = hasTreasure();
         int maxX = getMaxX();
@@ -151,7 +170,7 @@ public class GameHelper {
                     }
                 }
             }
-        }
+        } 
         lastHadTreasure = hasTreasureNow;
     }
 

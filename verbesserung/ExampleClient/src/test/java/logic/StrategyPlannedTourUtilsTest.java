@@ -1,5 +1,6 @@
 package logic;
 
+import java.awt.Point;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -8,12 +9,17 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Test;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import engine.FakeEngine;
+import map.ClientMap;
 import messagesbase.UniquePlayerIdentifier;
 import messagesbase.messagesfromclient.ETerrain;
+import messagesbase.messagesfromclient.PlayerHalfMap;
+import messagesbase.messagesfromclient.PlayerMove;
 import messagesbase.messagesfromserver.EFortState;
 import messagesbase.messagesfromserver.EPlayerGameState;
 import messagesbase.messagesfromserver.EPlayerPositionState;
@@ -22,11 +28,12 @@ import messagesbase.messagesfromserver.FullMap;
 import messagesbase.messagesfromserver.FullMapNode;
 import messagesbase.messagesfromserver.GameState;
 import messagesbase.messagesfromserver.PlayerState;
+import view.ConsoleView;
 
 class StrategyPlannedTourUtilsTest {
 
     private final int NUM_TEST_REPEATS = 100;
-
+    private final int NUM_ROUNDS_HIDDEN = 8;
     @Test
     void continiousPathBFS_findsSimplePath() {
         StrategyPlannedTour strategy = new StrategyPlannedTour();
@@ -358,8 +365,82 @@ class StrategyPlannedTourUtilsTest {
         
     }
 
+    @RepeatedTest(10)
+    public void firstEnemyObservedPositionAfter8Rounds() {
+        FakeEngine engine = new FakeEngine();
+        String playerId_1 = "player_1";
+        String playerId_2 = "player_2";
+        IStrategy strategy_1 = new StrategyPlannedTour();
+        IStrategy strategy_2 = new StrategyAlwaysClosest();
+        ClientMap mapGenerator_1 = new ClientMap(playerId_1);
+        PlayerHalfMap halfMapData_1 = mapGenerator_1.generate();
+        engine.registerPlayer(playerId_1, halfMapData_1);
+        
+        ClientMap mapGenerator_2 = new ClientMap(playerId_2);
+        PlayerHalfMap halfMapData_2 = mapGenerator_2.generate();
+        engine.registerPlayer(playerId_2, halfMapData_2);
 
-    
+        GameHelper helper_1 = new GameHelper(new UniquePlayerIdentifier(playerId_1));
+        GameHelper helper_2 = new GameHelper(new UniquePlayerIdentifier(playerId_2));
+        ConsoleView view = new ConsoleView();
+
+        GameState stateAfter2Rounds = null;
+        for(int i  = 0;;i++) {
+            
+            GameState state_1 = engine.getState(playerId_1);
+            GameState state_2 = engine.getState(playerId_2);
+            
+            helper_1.update(state_1);
+            helper_2.update(state_2);
+            view.render(helper_1);
+            
+            if(i < NUM_ROUNDS_HIDDEN) {
+                Point Pos2_expected = helper_1.getFirstTrueEnemyPosition();
+                assert(Pos2_expected == null);
+            }
+
+            if (engine.isFinished() || i == NUM_ROUNDS_HIDDEN) {
+                break;
+            }
+            
+            PlayerMove move_1 = strategy_1.calculateNextMove(helper_1);
+            engine.applyMove(move_1);
+            PlayerMove move_2 = strategy_2.calculateNextMove(helper_2);
+            engine.applyMove(move_2);
+        }
+        FullMapNode Pos1 = helper_1.getMyPosition();
+        FullMapNode Pos2 = helper_2.getMyPosition();
+
+        System.out.println("Player1 :" + Pos1.getX() + ", " + Pos1.getY());
+        System.out.println("Player2 :" + Pos2.getX() + ", " + Pos2.getY());
+
+        Point Pos2_expected = helper_1.getFirstTrueEnemyPosition();
+        Point Pos1_expected = helper_2.getFirstTrueEnemyPosition();
+        assertTrue(Pos2.getX() == Pos2_expected.x && Pos2.getY() == Pos2_expected.y);
+        assertTrue(Pos1.getX() == Pos1_expected.x && Pos1.getY() == Pos1_expected.y);
+        
+        for(int i  = 0;;i++) {
+              
+            Pos2_expected = helper_1.getFirstTrueEnemyPosition();
+            assertTrue(Pos2.getX() == Pos2_expected.x && Pos2.getY() == Pos2_expected.y);
+            
+            if (engine.isFinished() || i == 6) {
+                break;
+            }
+            
+            PlayerMove move_1 = strategy_1.calculateNextMove(helper_1);
+            engine.applyMove(move_1);
+            PlayerMove move_2 = strategy_2.calculateNextMove(helper_2);
+            engine.applyMove(move_2);
+
+            GameState state_1 = engine.getState(playerId_1);
+            GameState state_2 = engine.getState(playerId_2);
+            
+            helper_1.update(state_1);
+            helper_2.update(state_2);
+            view.render(helper_1);
+        }
+    }
 
 
 
