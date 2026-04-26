@@ -64,6 +64,100 @@ public class StrategyPlannedTour implements IStrategy {
         plannedTour = bestTour;
     }
 
+    /**
+     * Skips mountain goals that are not useful for exploration.
+     *
+     * A mountain goal is considered useful only if it can reveal at least one
+     * remaining grass goal within distance sqrt(2). If the mountain is not useful,
+     * it is removed from the remaining goals and the next closest goal is selected.
+     * 
+     * Container goalsRemaining will be modified inplace in case mountain was rejected 
+     * and next was recalculated.
+     * 
+     * @param next current candidate goal
+     * @param current current position from which the next goal is chosen
+     * @param goalsRemaining mutable set of goals that still need to be covered
+     * @param gameHelper helper used to search for the closest next goal
+     * @return the original goal if it is useful, the next useful goal, or null if none exists
+     */
+    private FullMapNode skipUselessMountainGoals(
+        FullMapNode next,
+        FullMapNode current,
+        Set<FullMapNode> goalsRemaining,
+        GameHelper gameHelper
+    ) {
+        while (next != null && next.getTerrain() == ETerrain.Mountain) {
+            boolean useful = false;
+
+            for (FullMapNode g : goalsRemaining) {
+                int dx = g.getX() - next.getX();
+                int dy = g.getY() - next.getY();
+
+                if (g.getTerrain() == ETerrain.Grass && (dx * dx + dy * dy <= 2)) {
+                    useful = true;
+                    break;
+                }
+            }
+
+            if (useful) {
+                break;
+            }
+
+            goalsRemaining.remove(next);
+            next = closestByBFS(current, goalsRemaining, gameHelper);
+        }
+
+        return next;
+    }
+
+    /**
+     * Removes already covered goals after a path segment has been added to the tour.
+     *
+     * Every node directly visited by the path is removed from goalsRemaining.
+     * Additionally, when the path visits a mountain node, nearby grass goals
+     * within observation distance are also removed, because they are considered
+     * observed from that mountain.
+     *
+     * Container goalsRemaining will be modified inplace.
+     * 
+     * @param path path segment that was just added to the tour
+     * @param goalsRemaining mutable set of goals that still need to be covered
+     */
+    private void updateGoalsRemainingAfterPath(
+        List<FullMapNode> path,
+        Set<FullMapNode> goalsRemaining
+    ) {
+        for (FullMapNode n : path) {
+            goalsRemaining.remove(n);
+
+            if (n.getTerrain() == ETerrain.Mountain) {
+                for (FullMapNode g : new HashSet<>(goalsRemaining)) {
+                    int dx = g.getX() - n.getX();
+                    int dy = g.getY() - n.getY();
+
+                    if (g.getTerrain() == ETerrain.Grass && ((dx * dx + dy * dy) <= 2)) {
+                        goalsRemaining.remove(g);
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * Builds a continuous tour starting from the player's current position and
+     * forcing the tour to first try the given anchor goal.
+     *
+     * The method repeatedly chooses the next closest remaining goal, builds a
+     * path to it, removes all goals covered by that path, and appends the path
+     * to the resulting tour.
+     *
+     * Mountain goals that do not help reveal nearby grass goals are skipped.
+     *
+     * @param gameHelper helper that provides the current player position and map neighbours
+     * @param anchor first goal candidate to try in the generated tour
+     * @param goals all goal nodes that should be covered by the tour
+     * @return continuous list of map nodes representing the generated tour
+     */
     List<FullMapNode> generateFullTourThroughAnchor(
         GameHelper gameHelper,
         FullMapNode anchor,
@@ -78,26 +172,8 @@ public class StrategyPlannedTour implements IStrategy {
         FullMapNode next = anchor;
 
         while (!goalsRemaining.isEmpty()) {
-            while (next != null && next.getTerrain() == ETerrain.Mountain) {
-                    boolean useful = false;
-                    
-                    for (FullMapNode g : goalsRemaining) {
-                        int dx = g.getX() - next.getX();
-                        int dy = g.getY() - next.getY();
-
-                        if (g.getTerrain() == ETerrain.Grass && (dx * dx + dy * dy <= 2)) {
-                            useful = true;
-                            break;
-                        }
-                    }
-
-                if (useful) {
-                    break;
-                }
-
-                goalsRemaining.remove(next);
-                next = closestByBFS(current, goalsRemaining, gameHelper);
-            }
+            
+            next = skipUselessMountainGoals(next, current, goalsRemaining, gameHelper);
 
             if(next == null)
             {
@@ -106,26 +182,11 @@ public class StrategyPlannedTour implements IStrategy {
 
             List<FullMapNode> path = continiousPathBFS(current, next, gameHelper, goalsRemaining);
             
-            // unpdate goals visibility assuming ALL nodes are Grass.
-            // Mountains logic is NOT implemented yet
-            for (FullMapNode n : path) {  
-                
-                goalsRemaining.remove(n);
-
-                if(n.getTerrain() == ETerrain.Mountain) {
-                    for(FullMapNode g: new HashSet<>(goalsRemaining)) {
-                        int dx = g.getX() - n.getX();
-                        int dy = g.getY() - n.getY();
-
-                        if(g.getTerrain() == ETerrain.Grass && ((dx*dx + dy*dy)  <= 2)) {
-                            goalsRemaining.remove(g);
-                        }
-                    }
-                }
-            }
-            path.remove(0);
-            tour.addAll(path);
             
+            updateGoalsRemainingAfterPath(path, goalsRemaining);
+             path.remove(0);
+             tour.addAll(path);
+
             current = next;
             next = closestByBFS(current, goalsRemaining, gameHelper);
         }
