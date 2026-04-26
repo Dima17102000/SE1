@@ -127,11 +127,25 @@ public class GameHelper {
         return !current.equals(previous);
     }
 
+    // private void updatePositions() {
+    //     Point currentPlayerPos = new Point(getMyPosition().getX(),getMyPosition().getY());
+    //     playerPosHistory.add(currentPlayerPos);
+    //     Point enemyPlayerPos = new Point(getEnemyPosition().getX(),getEnemyPosition().getY());
+    //     enemyPosHistory.add(enemyPlayerPos);
+    // }
     private void updatePositions() {
-        Point currentPlayerPos = new Point(getMyPosition().getX(),getMyPosition().getY());
-        playerPosHistory.add(currentPlayerPos);
-        Point enemyPlayerPos = new Point(getEnemyPosition().getX(),getEnemyPosition().getY());
-        enemyPosHistory.add(enemyPlayerPos);
+        
+        FullMapNode myPosition = getMyPosition();
+        if (myPosition != null) {
+            Point currentPlayerPos = new Point(myPosition.getX(), myPosition.getY());
+            playerPosHistory.add(currentPlayerPos);
+        }
+
+        FullMapNode enemyPosition = getEnemyPosition();
+        if (enemyPosition != null) {
+            Point enemyPlayerPos = new Point(enemyPosition.getX(), enemyPosition.getY());
+            enemyPosHistory.add(enemyPlayerPos);
+        }
     }
 
     public void update(GameState gameState) {
