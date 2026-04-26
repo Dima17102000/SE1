@@ -32,7 +32,6 @@ import view.ConsoleView;
 
 class StrategyPlannedTourUtilsTest {
 
-    private final int NUM_TEST_REPEATS = 100;
     private final int NUM_ROUNDS_HIDDEN = 8;
     @Test
     void continiousPathBFS_findsSimplePath() {
@@ -98,14 +97,7 @@ class StrategyPlannedTourUtilsTest {
         GameState gamestate = new GameState(map,players,"ABC");
         GameHelper helper = new GameHelper(new UniquePlayerIdentifier("player1"),true);
         helper.update(gamestate);
-        // GameHelper helper = mock(GameHelper.class);
-        // when(helper.getNeighbours4(a)).thenReturn(new ArrayList<>(List.of(b)));
-        // when(helper.getNeighbours4(b)).thenReturn(new ArrayList<>(List.of(a, w)));
-        // when(helper.getNeighbours4(w)).thenReturn(new ArrayList<>(List.of(b,c)));
-        // when(helper.getNeighbours4(c)).thenReturn(new ArrayList(List.of(w,d)));
-        // when(helper.getNeighbours4(d)).thenReturn(new ArrayList(List.of(c)));
-
-
+        
         List<FullMapNode> path = strategy.continiousPathBFS(a, d, helper, Set.of());
 
         assertTrue(
@@ -136,9 +128,8 @@ class StrategyPlannedTourUtilsTest {
 
         boolean sawPathViaB = false;
         boolean sawPathViaC = false;
-        for (int i = 0; i < NUM_TEST_REPEATS; i++) {
-            List<FullMapNode> path =
-                strategy.continiousPathBFS(a, d, helper, Set.of());
+        for (int i = 0; i < 100; i++) {
+            List<FullMapNode> path = strategy.continiousPathBFS(a, d, helper, Set.of());
 
             assertNotNull(path);
             assertEquals(a, path.get(0));
@@ -151,7 +142,7 @@ class StrategyPlannedTourUtilsTest {
                 break;
             }
         }
-
+        assertTrue(sawPathViaB && sawPathViaC);
     }
 
     @Test
@@ -168,9 +159,7 @@ class StrategyPlannedTourUtilsTest {
         GameState gamestate = new GameState(map,players,"ABC");
         GameHelper helper = new GameHelper(new UniquePlayerIdentifier("player1"));
         helper.update(gamestate);
-
-        for (int i = 0; i < NUM_TEST_REPEATS; i++) {
-
+        for (int i = 0; i < 100; i++) {
             List<FullMapNode> path = strategy.continiousPathBFS(a, d, helper, Set.of(a,c,d));
 
             assertNotNull(path);
@@ -184,8 +173,6 @@ class StrategyPlannedTourUtilsTest {
             assertTrue(path.contains(c));
         }
     }
-    // ===== helper method =====
-
     @Test
     void continiousPathBFS_choosesLongerButCheaperPath() {
         StrategyPlannedTour strategy = new StrategyPlannedTour();
@@ -364,8 +351,8 @@ class StrategyPlannedTourUtilsTest {
 
         
     }
-
-    @RepeatedTest(10)
+    //@Test
+    @RepeatedTest(100)
     public void firstEnemyObservedPositionAfter8Rounds() {
         FakeEngine engine = new FakeEngine();
         String playerId_1 = "player_1";
