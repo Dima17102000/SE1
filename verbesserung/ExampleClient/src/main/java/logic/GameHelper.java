@@ -195,8 +195,8 @@ public class GameHelper {
         if(!DEBUG)
         {
             checkAllNodesAreReachable();
+            initializeMapCoordinates();
         }
-        initializeMapCoordinates();
 
         isInitialized = true;
     }
@@ -308,5 +308,25 @@ public class GameHelper {
             }
         }
         return neighbours;
+    }
+
+    /**
+     * Calculates the movement cost between two directly adjacent nodes.
+     *
+     * The transition cost is the sum of terrain costs of both nodes:
+     * Grass = 1, Mountain = 2.
+     *
+     * @param from the source node
+     * @param to the directly adjacent target node
+     * @return the movement cost between the two nodes
+     */
+    private int terrainTransitionCost(FullMapNode from, FullMapNode to) {
+        int dx = to.getX() - from.getX();
+        int dy = to.getY() - from.getY();
+        assert dx * dx + dy * dy == 1;
+
+        int fromCost = (from.getTerrain() == ETerrain.Mountain) ? 2 : 1;
+        int toCost = (to.getTerrain() == ETerrain.Mountain) ? 2 : 1;
+        return fromCost + toCost;
     }
 }
