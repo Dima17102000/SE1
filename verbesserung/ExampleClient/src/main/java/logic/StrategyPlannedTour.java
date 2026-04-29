@@ -1,5 +1,6 @@
 package logic;
 
+import java.awt.Point;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -11,6 +12,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.PriorityQueue;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import messagesbase.messagesfromclient.EMove;
 import messagesbase.messagesfromclient.ETerrain;
@@ -324,20 +326,41 @@ public class StrategyPlannedTour implements IStrategy {
         return score;
     }
 
-    private void addMountainGoals(Set<FullMapNode> goals, FullMap map, GameHelper gameHelper, boolean enemySide) {
-        map.getMapNodes().stream()
+    private Set<FullMapNode> getMountainGoals(GameHelper gameHelper, boolean enemySide) {
+        return gameHelper.getMap().getMapNodes().stream()
             .filter(n -> !gameHelper.isVisited(n))
             .filter(n -> n.getTerrain() == ETerrain.Mountain)
             .filter(n -> enemySide ? gameHelper.insideEnemy(n) : gameHelper.insideMine(n))
-            .forEach(goals::add);
+            .collect(Collectors.toSet());
     }
 
-    private void addGrassGoals(Set<FullMapNode> goals, FullMap map, GameHelper gameHelper, boolean enemySide) {
-        map.getMapNodes().stream()
+    private Set<FullMapNode> getGrassGoals(GameHelper gameHelper, boolean enemySide) {
+        return gameHelper.getMap().getMapNodes().stream()
             .filter(n -> !gameHelper.isObserved(n))
             .filter(n -> n.getTerrain() == ETerrain.Grass)
             .filter(n -> enemySide ? gameHelper.insideEnemy(n) : gameHelper.insideMine(n))
-            .forEach(goals::add);
+            .collect(Collectors.toSet());
+    }
+
+    private Set<FullMapNode> getExpectedFortNodes(GameHelper gameHelper) {
+        Point enemyPos = gameHelper.getFirstTrueEnemyPosition();
+        Set<FullMapNode> result = new HashSet<>();
+        if(enemyPos == null) {
+            return result;
+        }
+        FullMapNode enemyNode = gameHelper.getMap().getMapNodes().stream()
+        .filter(n -> n.getX() == enemyPos.x && n.getY() == enemyPos.y)
+        .findFirst()
+        .orElse(null);
+
+        if(enemyNode == null) {
+            return result;
+        }
+        result = getNodesInRadius(enemyNode,8, gameHelper).stream()
+        .filter(n -> !gameHelper.isObserved(n))
+        .filter(n -> gameHelper.insideEnemy(n))
+        .collect(Collectors.toSet());
+        return result;
     }
 
     private Set<FullMapNode> collectGoals(GameHelper gameHelper){
@@ -362,10 +385,13 @@ public class StrategyPlannedTour implements IStrategy {
                 .filter(n -> n.getFortState() == EFortState.EnemyFortPresent)
                 .forEach(goals::add);
                 // fallback: исследуем чужую половину
-                
             if(goals.isEmpty()) {
-                addMountainGoals(goals, map, gameHelper,true);
-                addGrassGoals(goals, map, gameHelper, true);
+                goals.addAll(getExpectedFortNodes(gameHelper));
+            }
+
+            if(goals.isEmpty()) {
+                goals.addAll(getMountainGoals(gameHelper,true));
+                goals.addAll(getGrassGoals(gameHelper, true));
             }
         } else {
             map.getMapNodes().stream()
@@ -373,8 +399,8 @@ public class StrategyPlannedTour implements IStrategy {
                 .forEach(goals::add);
 
             if(goals.isEmpty()) {
-                addMountainGoals(goals, map, gameHelper,false);
-                addGrassGoals(goals, map, gameHelper,false);
+                goals.addAll(getMountainGoals(gameHelper,false));
+                goals.addAll(getGrassGoals(gameHelper,false));
             }
         }
 
@@ -517,6 +543,73 @@ public class StrategyPlannedTour implements IStrategy {
         return path;
     }
 
+
+    /**
+     * Returns all map nodes that can be reached from the given center node
+     * with a total movement cost less than or equal to the given radius.
+     *
+     * Movement is calculated using 4-neighbour movement only.
+     * The cost of moving from one node to another is the sum of both terrain costs:
+     * Grass = 1, Mountain = 2.
+     *
+     * @param center the start node of the radius search
+     * @param radius the maximum allowed movement cost
+     * @return a set of all reachable nodes inside the given radius, including center
+     */
+    public Set<FullMapNode> getNodesInRadius(FullMapNode center, int radius,GameHelper gameHelper) {
+        class PQItem {
+            final FullMapNode node;
+            final int cost;
+
+            PQItem(FullMapNode node, int cost) {
+                this.node = node;
+                this.cost = cost;
+            }
+        }
+
+        Set<FullMapNode> result = new HashSet<>();
+        Map<FullMapNode, Integer> bestCost = new HashMap<>();
+
+        PriorityQueue<PQItem> pq =
+            new PriorityQueue<>(Comparator.comparingInt(it -> it.cost));
+
+        pq.add(new PQItem(center, 0));
+        bestCost.put(center, 0);
+
+        while (!pq.isEmpty()) {
+            PQItem cur = pq.poll();
+
+            if (cur.cost > bestCost.get(cur.node)) {
+                continue;
+            }
+
+            result.add(cur.node);
+
+            for (FullMapNode nb : gameHelper.getNeighbours4(cur.node)) {
+                int newCost = cur.cost + terrainTransitionCost(cur.node, nb);
+
+                if (newCost <= radius &&
+                    newCost < bestCost.getOrDefault(nb, Integer.MAX_VALUE)) {
+
+                    bestCost.put(nb, newCost);
+                    pq.add(new PQItem(nb, newCost));
+                }
+            }
+        }
+
+        return result;
+    }
+
+    /**
+     * Calculates the movement cost between two directly adjacent nodes.
+     *
+     * The transition cost is the sum of terrain costs of both nodes:
+     * Grass = 1, Mountain = 2.
+     *
+     * @param from the source node
+     * @param to the directly adjacent target node
+     * @return the movement cost between the two nodes
+     */
     private int terrainTransitionCost(FullMapNode from, FullMapNode to) {
         int dx = to.getX() - from.getX();
         int dy = to.getY() - from.getY();
