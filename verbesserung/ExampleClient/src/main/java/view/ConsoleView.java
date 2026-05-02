@@ -9,7 +9,8 @@ import messagesbase.messagesfromserver.FullMap;
 import messagesbase.messagesfromserver.FullMapNode;
 
 public class ConsoleView {
-    public ConsoleView() {}
+    public ConsoleView() {
+    }
 
     public void render(GameHelper gameHelper) {
         FullMap map = gameHelper.getMap();
@@ -32,7 +33,7 @@ public class ConsoleView {
             System.out.println(); // Zeilenumbruch
         }
     }
-  
+
     private String getSymbolForNode(FullMapNode node, GameHelper gameHelper) {
         // Spielerzustand hat höchste Priorität
         EPlayerPositionState position = node.getPlayerPositionState();
@@ -57,7 +58,7 @@ public class ConsoleView {
         // // Schatzanzeige (anders je nach Sammlung)
         if (gameHelper.goldWasHere(node)) {
             ETreasureState hasTreasure = node.getTreasureState();
-            switch(hasTreasure) {
+            switch (hasTreasure) {
                 case ETreasureState.MyTreasureIsPresent:
                     return "💰"; // Sichtbarer Schatz
                 case ETreasureState.NoOrUnknownTreasureState:
@@ -67,18 +68,18 @@ public class ConsoleView {
 
         // Terrainanzeige
         ETerrain terrain = node.getTerrain();
-        if(gameHelper.isObserved(node)) {
+        if (gameHelper.isObserved(node)) {
             return switch (terrain) {
-                case ETerrain.Grass -> "🟢";     
-                case ETerrain.Water -> "\uD83D\uDFE6";     
-                case ETerrain.Mountain -> "🟤"; 
+                case ETerrain.Grass -> "🟢";
+                case ETerrain.Water -> "\uD83D\uDFE6";
+                case ETerrain.Mountain -> "🟤";
             };
         } else {
             return switch (terrain) {
                 case ETerrain.Grass -> "\uD83D\uDFE9";
                 case ETerrain.Water -> "\uD83D\uDFE6";
                 case ETerrain.Mountain -> "\uD83D\uDFEB";
-            };  
+            };
         }
     }
 

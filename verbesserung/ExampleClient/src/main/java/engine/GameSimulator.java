@@ -30,7 +30,7 @@ public class GameSimulator {
 
     public static void singlePlayer(String[] args) {
         FakeEngine engine = new FakeEngine();
-        
+
         String playerId_1 = "player_1";
         String playerId_2 = "player_2";
 
@@ -41,22 +41,21 @@ public class GameSimulator {
         ClientMap mapGenerator_1 = new ClientMap(playerId_1);
         PlayerHalfMap halfMapData_1 = mapGenerator_1.generate();
         engine.registerPlayer(playerId_1, halfMapData_1);
-        
+
         ClientMap mapGenerator_2 = new ClientMap(playerId_2);
         PlayerHalfMap halfMapData_2 = mapGenerator_2.generate();
         engine.registerPlayer(playerId_2, halfMapData_2);
 
         GameHelper helper = new GameHelper(
-            new UniquePlayerIdentifier(playerId_1)
-        );
+                new UniquePlayerIdentifier(playerId_1));
         ConsoleView view = new ConsoleView();
 
         while (true) {
             GameState state = engine.getState(playerId_1);
-            
+
             helper.update(state);
             view.render(helper);
-            
+
             if (engine.isFinished()) {
                 break;
             }
@@ -68,7 +67,7 @@ public class GameSimulator {
 
     public static void multiPlayer(String[] args) {
         FakeEngine engine = new FakeEngine();
-        
+
         String playerId_1 = "player_1";
         String playerId_2 = "player_2";
 
@@ -80,7 +79,7 @@ public class GameSimulator {
         ClientMap mapGenerator_1 = new ClientMap(playerId_1);
         PlayerHalfMap halfMapData_1 = mapGenerator_1.generate();
         engine.registerPlayer(playerId_1, halfMapData_1);
-        
+
         ClientMap mapGenerator_2 = new ClientMap(playerId_2);
         PlayerHalfMap halfMapData_2 = mapGenerator_2.generate();
         engine.registerPlayer(playerId_2, halfMapData_2);
@@ -92,7 +91,7 @@ public class GameSimulator {
         while (true) {
             GameState state_1 = engine.getState(playerId_1);
             GameState state_2 = engine.getState(playerId_2);
-            
+
             helper_1.update(state_1);
             helper_2.update(state_2);
             view.render(helper_1);
@@ -100,7 +99,7 @@ public class GameSimulator {
             if (engine.isFinished()) {
                 break;
             }
-            
+
             PlayerMove move_1 = strategy_1.calculateNextMove(helper_1);
             engine.applyMove(move_1);
             PlayerMove move_2 = strategy_2.calculateNextMove(helper_2);

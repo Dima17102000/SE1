@@ -15,7 +15,7 @@ import messagesbase.messagesfromserver.FullMapNode;
 public class Pathfinder {
 
     private final Map<String, FullMapNode> graph = new HashMap<>();
-    
+
     public Pathfinder(FullMap map) {
         for (FullMapNode node : map.getMapNodes()) {
             graph.put(key(node.getX(), node.getY()), node);
@@ -28,8 +28,8 @@ public class Pathfinder {
 
     private List<FullMapNode> getNeighbors(FullMapNode node) {
         List<FullMapNode> neighbors = new ArrayList<>();
-        int[][] directions = {{0, 1}, {1, 0}, {-1, 0}, {0, -1}};
-        //                   {Down,    Right,  Left,    Up}
+        int[][] directions = { { 0, 1 }, { 1, 0 }, { -1, 0 }, { 0, -1 } };
+        // {Down, Right, Left, Up}
         for (int[] dir : directions) {
             int nx = node.getX() + dir[0];
             int ny = node.getY() + dir[1];
@@ -85,7 +85,8 @@ public class Pathfinder {
 
             FullMapNode currentNode = graph.get(current.key);
             for (FullMapNode neighbor : getNeighbors(currentNode)) {
-                if (neighbor.getTerrain() == ETerrain.Water) continue;
+                if (neighbor.getTerrain() == ETerrain.Water)
+                    continue;
 
                 String neighborKey = key(neighbor.getX(), neighbor.getY());
                 int newCost = costSoFar.get(current.key) + getTerrainCost(neighbor);

@@ -9,24 +9,20 @@ import messagesbase.messagesfromserver.GameState;
 import messagesbase.messagesfromserver.PlayerState;
 
 public class Utils {
-    public static GameHelper generateGameHelper(FullMap map)
-    {
+    public static GameHelper generateGameHelper(FullMap map) {
         GameHelper helper = new GameHelper(new UniquePlayerIdentifier("player1"));
 
-            GameState gameState = new GameState(
+        GameState gameState = new GameState(
                 map,
                 Set.of(
-                    new PlayerState(
-                        "Test",
-                        "Player",
-                        "u123456",
-                        EPlayerGameState.MustWait,
-                        new UniquePlayerIdentifier("player1"),
-                        false
-                    )
-                ),
-                "ABC"
-            );
+                        new PlayerState(
+                                "Test",
+                                "Player",
+                                "u123456",
+                                EPlayerGameState.MustWait,
+                                new UniquePlayerIdentifier("player1"),
+                                false)),
+                "ABC");
 
         helper.update(gameState);
 

@@ -12,5 +12,5 @@ public class FakeEngineTest {
         GameSimulator simulator = new GameSimulator();
         simulator.multiPlayer(null);
     }
-    
+
 }

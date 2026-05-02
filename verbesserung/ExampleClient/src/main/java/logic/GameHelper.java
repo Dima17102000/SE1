@@ -18,7 +18,6 @@ import messagesbase.messagesfromserver.FullMapNode;
 import messagesbase.messagesfromserver.GameState;
 import messagesbase.messagesfromserver.PlayerState;
 
-
 public class GameHelper {
     private Boolean DEBUG = false;
 
@@ -38,7 +37,7 @@ public class GameHelper {
     private int enemyYmin;
     private int enemyYmax;
     private boolean isInitialized = false;
-    
+
     private List<Point> playerPosHistory = new ArrayList<>();
     private List<Point> enemyPosHistory = new ArrayList<>();
 
@@ -50,6 +49,7 @@ public class GameHelper {
         this.playerId = playerId;
         this.DEBUG = debug;
     }
+
     public UniquePlayerIdentifier getPlayerId() {
         return playerId;
     }
@@ -71,7 +71,7 @@ public class GameHelper {
     private String key(FullMapNode node) {
         return node.getX() + "," + node.getY();
     }
-    
+
     public boolean isVisited(FullMapNode node) {
         return visitedFields.contains(key(node));
     }
@@ -79,22 +79,25 @@ public class GameHelper {
     public boolean isObserved(FullMapNode node) {
         return observedFields.contains(key(node));
     }
-    
+
     public FullMapNode getMyPosition() {
         FullMap map = currentGameState.getMap();
         return map.getMapNodes().stream()
-                .filter(n -> n.getPlayerPositionState() == EPlayerPositionState.BothPlayerPosition || n.getPlayerPositionState() == EPlayerPositionState.MyPlayerPosition)
+                .filter(n -> n.getPlayerPositionState() == EPlayerPositionState.BothPlayerPosition
+                        || n.getPlayerPositionState() == EPlayerPositionState.MyPlayerPosition)
                 .findFirst().orElse(null);
     }
+
     public FullMapNode getEnemyPosition() {
         FullMap map = currentGameState.getMap();
         return map.getMapNodes().stream()
-                .filter(n -> n.getPlayerPositionState() == EPlayerPositionState.BothPlayerPosition || n.getPlayerPositionState() == EPlayerPositionState.EnemyPlayerPosition)
+                .filter(n -> n.getPlayerPositionState() == EPlayerPositionState.BothPlayerPosition
+                        || n.getPlayerPositionState() == EPlayerPositionState.EnemyPlayerPosition)
                 .findFirst().orElse(null);
     }
-    
+
     public Point getFirstTrueEnemyPosition() {
-        if(enemyPosHistory.size() > 8) {
+        if (enemyPosHistory.size() > 8) {
             return enemyPosHistory.get(8);
         }
         return null;
@@ -106,35 +109,37 @@ public class GameHelper {
 
     public boolean hasTreasure() {
         return currentGameState.getPlayers().stream()
-            .filter(p->p.getUniquePlayerID().equals(playerId.getUniquePlayerID()))
-            .findFirst()
-            .map(PlayerState::hasCollectedTreasure)
-            .orElse(false);
+                .filter(p -> p.getUniquePlayerID().equals(playerId.getUniquePlayerID()))
+                .findFirst()
+                .map(PlayerState::hasCollectedTreasure)
+                .orElse(false);
     }
 
     public boolean playerRecentlyMoved() {
-        
+
         // System.out.println("Size of Array: " + playerPosHistory.size());
 
         int size = playerPosHistory.size();
         if (size < 2) {
             return true;
         }
-        
+
         Point previous = playerPosHistory.get(size - 2);
-        Point current = playerPosHistory.get(size -  1);
+        Point current = playerPosHistory.get(size - 1);
 
         return !current.equals(previous);
     }
 
     // private void updatePositions() {
-    //     Point currentPlayerPos = new Point(getMyPosition().getX(),getMyPosition().getY());
-    //     playerPosHistory.add(currentPlayerPos);
-    //     Point enemyPlayerPos = new Point(getEnemyPosition().getX(),getEnemyPosition().getY());
-    //     enemyPosHistory.add(enemyPlayerPos);
+    // Point currentPlayerPos = new
+    // Point(getMyPosition().getX(),getMyPosition().getY());
+    // playerPosHistory.add(currentPlayerPos);
+    // Point enemyPlayerPos = new
+    // Point(getEnemyPosition().getX(),getEnemyPosition().getY());
+    // enemyPosHistory.add(enemyPlayerPos);
     // }
     private void updatePositions() {
-        
+
         FullMapNode myPosition = getMyPosition();
         if (myPosition != null) {
             Point currentPlayerPos = new Point(myPosition.getX(), myPosition.getY());
@@ -159,24 +164,24 @@ public class GameHelper {
 
         for (FullMapNode node : map.getMapNodes()) {
             String key = key(node);
-            if(node.getTreasureState() == ETreasureState.MyTreasureIsPresent){
+            if (node.getTreasureState() == ETreasureState.MyTreasureIsPresent) {
                 rememberGoldPosition = key;
             }
-            if(node.getPlayerPositionState() == EPlayerPositionState.MyPlayerPosition || node.getPlayerPositionState() == EPlayerPositionState.BothPlayerPosition)
-            {
+            if (node.getPlayerPositionState() == EPlayerPositionState.MyPlayerPosition
+                    || node.getPlayerPositionState() == EPlayerPositionState.BothPlayerPosition) {
                 visitedFields.add(key);
                 observedFields.add(key);
 
-                if(hasTreasureNow && !lastHadTreasure){
+                if (hasTreasureNow && !lastHadTreasure) {
                     rememberGoldPosition = key;
                 }
-                if(node.getTerrain() == ETerrain.Mountain)
-                {
-                    int[][] dirs = {{1, 0}, {-1, 0}, {0, 1}, {0, -1},{1,1},{-1,1},{-1,-1},{1,-1}}; 
+                if (node.getTerrain() == ETerrain.Mountain) {
+                    int[][] dirs = { { 1, 0 }, { -1, 0 }, { 0, 1 }, { 0, -1 }, { 1, 1 }, { -1, 1 }, { -1, -1 },
+                            { 1, -1 } };
                     for (int[] dir : dirs) {
                         int nx = node.getX() + dir[0];
                         int ny = node.getY() + dir[1];
-            
+
                         if (nx >= 0 && ny >= 0 && nx <= maxX && ny <= maxY) {
                             String neighbourkey = nx + "," + ny;
                             observedFields.add(neighbourkey);
@@ -184,16 +189,15 @@ public class GameHelper {
                     }
                 }
             }
-        } 
+        }
         lastHadTreasure = hasTreasureNow;
     }
 
     private void initialize() {
-        if(isInitialized)
+        if (isInitialized)
             return;
 
-        if(!DEBUG)
-        {
+        if (!DEBUG) {
             checkAllNodesAreReachable();
             initializeMapCoordinates();
         }
@@ -202,13 +206,14 @@ public class GameHelper {
     }
 
     private void checkAllNodesAreReachable() {
-        /* checkAllGoalsAreReachable
-        Returns True if all Goals are reachable, returns False otherwise
-        */
+        /*
+         * checkAllGoalsAreReachable
+         * Returns True if all Goals are reachable, returns False otherwise
+         */
 
         Set<FullMapNode> nodesLeft = getMap().getMapNodes().stream()
-            .filter(n -> n.getTerrain() != ETerrain.Water)
-            .collect(Collectors.toSet());
+                .filter(n -> n.getTerrain() != ETerrain.Water)
+                .collect(Collectors.toSet());
         Set<FullMapNode> visited = new HashSet<>();
         Queue<FullMapNode> queue = new LinkedList<>();
 
@@ -221,7 +226,7 @@ public class GameHelper {
             visited.add(current);
             nodesLeft.remove(current);
 
-            for (FullMapNode nb: this.getNeighbours4(current)) {
+            for (FullMapNode nb : this.getNeighbours4(current)) {
                 if (!visited.contains(nb)) {
                     queue.add(nb);
                 }
@@ -234,44 +239,60 @@ public class GameHelper {
     private void initializeMapCoordinates() {
         FullMap map = this.getMap();
         FullMapNode myPosition = this.getMyPosition();
-        int maxX = this.getMaxX();  // 9 or 19
-        int maxY = this.getMaxY();  // 9 or 4
+        int maxX = this.getMaxX(); // 9 or 19
+        int maxY = this.getMaxY(); // 9 or 4
         int playerX = myPosition.getX();
         int playerY = myPosition.getY();
 
         if (maxX == 9 && maxY == 9) {
             // 10x10 — split horizontally
-            myXmin = 0; myXmax = 10;
-            myYmin = 0; myYmax = 5;
+            myXmin = 0;
+            myXmax = 10;
+            myYmin = 0;
+            myYmax = 5;
 
             if (myXmin <= playerX && playerX < myXmax && myYmin <= playerY && playerY < myYmax) {
-                enemyXmin = 0; enemyXmax = 10;
-                enemyYmin = 5; enemyYmax = 10;
+                enemyXmin = 0;
+                enemyXmax = 10;
+                enemyYmin = 5;
+                enemyYmax = 10;
             } else {
-                myXmin = 0; myXmax = 10;
-                myYmin = 5; myYmax = 10;
+                myXmin = 0;
+                myXmax = 10;
+                myYmin = 5;
+                myYmax = 10;
 
-                enemyXmin = 0; enemyXmax = 10;
-                enemyYmin = 0; enemyYmax = 5;
+                enemyXmin = 0;
+                enemyXmax = 10;
+                enemyYmin = 0;
+                enemyYmax = 5;
             }
         } else if (maxX == 19 && maxY == 4) {
             // 20x5 — split vertically
-            myXmin = 0; myXmax = 10;
-            myYmin = 0; myYmax = 5;
+            myXmin = 0;
+            myXmax = 10;
+            myYmin = 0;
+            myYmax = 5;
 
             if (myXmin <= playerX && playerX < myXmax && myYmin <= playerY && playerY < myYmax) {
-                enemyXmin = 10; enemyXmax = 20;
-                enemyYmin = 0; enemyYmax = 5;
+                enemyXmin = 10;
+                enemyXmax = 20;
+                enemyYmin = 0;
+                enemyYmax = 5;
             } else {
-                myXmin = 10; myXmax = 20;
-                myYmin = 0; myYmax = 5;
+                myXmin = 10;
+                myXmax = 20;
+                myYmin = 0;
+                myYmax = 5;
 
-                enemyXmin = 0; enemyXmax = 10;
-                enemyYmin = 0; enemyYmax = 5;
+                enemyXmin = 0;
+                enemyXmax = 10;
+                enemyYmin = 0;
+                enemyYmax = 5;
             }
         } else {
             System.err.println("Unknown map format (" + (maxX + 1) + " x " + (maxY + 1) + ")");
-        }        
+        }
     }
 
     public boolean insideMine(FullMapNode n) {
@@ -284,12 +305,10 @@ public class GameHelper {
 
     public List<FullMapNode> getNeighbours4(FullMapNode node) {
         List<FullMapNode> neighbours = new ArrayList<>();
-        for(FullMapNode n: this.getMap().getMapNodes())
-        {
+        for (FullMapNode n : this.getMap().getMapNodes()) {
             int dx = n.getX() - node.getX();
             int dy = n.getY() - node.getY();
-            if((dx*dx + dy*dy) == 1 && n.getTerrain() != ETerrain.Water)
-            {
+            if ((dx * dx + dy * dy) == 1 && n.getTerrain() != ETerrain.Water) {
                 neighbours.add(n);
             }
         }
@@ -298,12 +317,10 @@ public class GameHelper {
 
     public List<FullMapNode> getNeighbours8(FullMapNode node) {
         List<FullMapNode> neighbours = new ArrayList<>();
-        for(FullMapNode n: this.getMap().getMapNodes())
-        {
+        for (FullMapNode n : this.getMap().getMapNodes()) {
             int dx = n.getX() - node.getX();
             int dy = n.getY() - node.getY();
-            if((dx*dx + dy*dy) <= 2 && n.getTerrain() != ETerrain.Water)
-            {
+            if ((dx * dx + dy * dy) <= 2 && n.getTerrain() != ETerrain.Water) {
                 neighbours.add(n);
             }
         }
@@ -317,7 +334,7 @@ public class GameHelper {
      * Grass = 1, Mountain = 2.
      *
      * @param from the source node
-     * @param to the directly adjacent target node
+     * @param to   the directly adjacent target node
      * @return the movement cost between the two nodes
      */
     private int terrainTransitionCost(FullMapNode from, FullMapNode to) {

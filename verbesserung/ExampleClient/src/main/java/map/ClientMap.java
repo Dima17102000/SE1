@@ -22,21 +22,22 @@ public class ClientMap {
         this.height = 5;
         this.width = 10;
     }
-    public ClientMap(String playerId,int height,int width)
-    {
+
+    public ClientMap(String playerId, int height, int width) {
         this.playerId = playerId;
         this.height = height;
         this.width = width;
     }
+
     public PlayerHalfMap generate_old() {
         List<PlayerHalfMapNode> nodes = new ArrayList<>();
         Random rand = RandomManager.getRandom();
 
         int total = width * height;
-        int mingrassCount = (int)Math.floor(total * 0.48);
-        int minwaterCount = (int)Math.floor(total * 0.14);
-        int minmountainCount = (int)Math.floor(total * 0.10);
-        while(true){
+        int mingrassCount = (int) Math.floor(total * 0.48);
+        int minwaterCount = (int) Math.floor(total * 0.14);
+        int minmountainCount = (int) Math.floor(total * 0.10);
+        while (true) {
             nodes.clear();
             int grassCount = 0;
             int waterCount = 0;
@@ -55,7 +56,8 @@ public class ClientMap {
                     ETerrain proposedTerrain = randomTerrain(rand);
 
                     if (proposedTerrain == ETerrain.Water && ((isEdgeTop && waterTop >= 2) ||
-                            (isEdgeBottom && waterBottom >= 2) || (isEdgeLeft && waterLeft >= 2) || (isEdgeRight && waterRight >= 2))) {
+                            (isEdgeBottom && waterBottom >= 2) || (isEdgeLeft && waterLeft >= 2)
+                            || (isEdgeRight && waterRight >= 2))) {
                         terrain = chooseNonWater(rand);
                     } else {
                         terrain = proposedTerrain;
@@ -63,43 +65,51 @@ public class ClientMap {
 
                     if (terrain == ETerrain.Water) {
                         waterCount++;
-                        if (isEdgeTop) waterTop++;
-                        if (isEdgeBottom) waterBottom++;
-                        if (isEdgeLeft) waterLeft++;
-                        if (isEdgeRight) waterRight++;
+                        if (isEdgeTop)
+                            waterTop++;
+                        if (isEdgeBottom)
+                            waterBottom++;
+                        if (isEdgeLeft)
+                            waterLeft++;
+                        if (isEdgeRight)
+                            waterRight++;
                     }
-                    if (terrain == ETerrain.Grass) grassCount++;
-                    if (terrain == ETerrain.Mountain) mountainCount++;
+                    if (terrain == ETerrain.Grass)
+                        grassCount++;
+                    if (terrain == ETerrain.Mountain)
+                        mountainCount++;
 
                     // PlayerHalfMapNode node = new PlayerHalfMapNode(x, y, false, terrain);
-                    nodes.add(new PlayerHalfMapNode(x,y,false,terrain));
+                    nodes.add(new PlayerHalfMapNode(x, y, false, terrain));
                 }
             }
-            
+
             if (grassCount < mingrassCount || waterCount < minwaterCount || mountainCount < minmountainCount) {
-                // System.out.println("⚠️ Bedingungen nicht erfüllt – Map wird neu generiert...");
+                // System.out.println("⚠️ Bedingungen nicht erfüllt – Map wird neu
+                // generiert...");
                 continue;
             }
 
             // 🏰 Place the fort near the center (x 3-6, y 1-3)
             int countfort = 0;
-            for (int i = 0; i < 1000 && countfort < FORTCOUNT; ++i){
+            for (int i = 0; i < 1000 && countfort < FORTCOUNT; ++i) {
                 int idx = rand.nextInt(nodes.size());
                 PlayerHalfMapNode node = nodes.get(idx);
                 if (node.getTerrain() != ETerrain.Grass)
                     continue;
-                // if (node.getX() >= 3 && node.getX() <= 6 && node.getY() >= 1 && node.getY() <= 3 && !node.isFortPresent())
-                //     continue;
-                if(node.isFortPresent())
+                // if (node.getX() >= 3 && node.getX() <= 6 && node.getY() >= 1 && node.getY()
+                // <= 3 && !node.isFortPresent())
+                // continue;
+                if (node.isFortPresent())
                     continue;
                 PlayerHalfMapNode fortNode = new PlayerHalfMapNode(node.getX(), node.getY(), true, ETerrain.Grass);
                 nodes.set(idx, fortNode);
                 countfort++;
                 System.out.println("Coordinates of Fort " + node.getX() + node.getY());
             }
-            if(countfort < FORTCOUNT) continue;
-            
-            
+            if (countfort < FORTCOUNT)
+                continue;
+
             if (!isMapConnected(nodes)) {
                 // System.out.println("🔁 Ungültige Map – wird neu generiert...");
                 continue;
@@ -109,15 +119,16 @@ public class ClientMap {
 
         return new PlayerHalfMap(playerId, nodes);
     }
+
     public PlayerHalfMap generate() {
         List<PlayerHalfMapNode> nodes = new ArrayList<>();
         Random rand = RandomManager.getRandom();
 
         int total = width * height;
-        int mingrassCount = (int)Math.floor(total * 0.48);
-        int minwaterCount = (int)Math.floor(total * 0.14);
-        int minmountainCount = (int)Math.floor(total * 0.10);
-        while(true){
+        int mingrassCount = (int) Math.floor(total * 0.48);
+        int minwaterCount = (int) Math.floor(total * 0.14);
+        int minmountainCount = (int) Math.floor(total * 0.10);
+        while (true) {
             nodes.clear();
             int grassCount = 0;
             int waterCount = 0;
@@ -126,47 +137,51 @@ public class ClientMap {
 
             for (int y = 0; y < height; y++) {
                 for (int x = 0; x < width; x++) {
-                    
-                    ETerrain  terrain = randomTerrain(rand);
 
-                    if (terrain == ETerrain.Water) waterCount++;
-                    if (terrain == ETerrain.Grass) grassCount++;
-                    if (terrain == ETerrain.Mountain) mountainCount++;
+                    ETerrain terrain = randomTerrain(rand);
+
+                    if (terrain == ETerrain.Water)
+                        waterCount++;
+                    if (terrain == ETerrain.Grass)
+                        grassCount++;
+                    if (terrain == ETerrain.Mountain)
+                        mountainCount++;
 
                     // PlayerHalfMapNode node = new PlayerHalfMapNode(x, y, false, terrain);
-                    nodes.add(new PlayerHalfMapNode(x,y,false,terrain));
+                    nodes.add(new PlayerHalfMapNode(x, y, false, terrain));
                 }
             }
-            
+
             if (grassCount < mingrassCount || waterCount < minwaterCount || mountainCount < minmountainCount) {
-                // System.out.println("⚠️ Bedingungen nicht erfüllt – Map wird neu generiert...");
+                // System.out.println("⚠️ Bedingungen nicht erfüllt – Map wird neu
+                // generiert...");
                 continue;
             }
 
-            if(!validateEdgesSimple(nodes))
-            {
+            if (!validateEdgesSimple(nodes)) {
                 continue;
             }
 
             // 🏰 Place the fort near the center (x 3-6, y 1-3)
             int countfort = 0;
-            for (int i = 0; i < 1000 && countfort < FORTCOUNT; ++i){
+            for (int i = 0; i < 1000 && countfort < FORTCOUNT; ++i) {
                 int idx = rand.nextInt(nodes.size());
                 PlayerHalfMapNode node = nodes.get(idx);
                 if (node.getTerrain() != ETerrain.Grass)
                     continue;
-                // if (node.getX() >= 3 && node.getX() <= 6 && node.getY() >= 1 && node.getY() <= 3 && !node.isFortPresent())
-                //     continue;
-                if(node.isFortPresent())
+                // if (node.getX() >= 3 && node.getX() <= 6 && node.getY() >= 1 && node.getY()
+                // <= 3 && !node.isFortPresent())
+                // continue;
+                if (node.isFortPresent())
                     continue;
                 PlayerHalfMapNode fortNode = new PlayerHalfMapNode(node.getX(), node.getY(), true, ETerrain.Grass);
                 nodes.set(idx, fortNode);
                 countfort++;
                 System.out.println("Coordinates of Fort " + node.getX() + node.getY());
             }
-            if(countfort < FORTCOUNT) continue;
-            
-            
+            if (countfort < FORTCOUNT)
+                continue;
+
             if (!isMapConnected(nodes)) {
                 // System.out.println("🔁 Ungültige Map – wird neu generiert...");
                 continue;
@@ -179,8 +194,10 @@ public class ClientMap {
 
     private ETerrain randomTerrain(Random rand) {
         int r = rand.nextInt(100);
-        if (r < 80) return ETerrain.Grass;
-        if (r < 90) return ETerrain.Mountain;
+        if (r < 80)
+            return ETerrain.Grass;
+        if (r < 90)
+            return ETerrain.Mountain;
         return ETerrain.Water;
     }
 
@@ -189,7 +206,6 @@ public class ClientMap {
     }
 
     private boolean isMapConnected(List<PlayerHalfMapNode> mapNodes) {
-        
 
         boolean[][] visited = new boolean[height][width];
         List<PlayerHalfMapNode> walkables = new ArrayList<>();
@@ -200,7 +216,8 @@ public class ClientMap {
             }
         }
 
-        if (walkables.isEmpty()) return false;
+        if (walkables.isEmpty())
+            return false;
 
         Queue<PlayerHalfMapNode> queue = new LinkedList<>();
         PlayerHalfMapNode start = walkables.get(0);
@@ -214,7 +231,7 @@ public class ClientMap {
             int x = current.getX();
             int y = current.getY();
 
-            int[][] dirs = {{1, 0}, {-1, 0}, {0, 1}, {0, -1}};
+            int[][] dirs = { { 1, 0 }, { -1, 0 }, { 0, 1 }, { 0, -1 } };
             for (int[] d : dirs) {
                 int nx = x + d[0];
                 int ny = y + d[1];
@@ -235,37 +252,41 @@ public class ClientMap {
         return connectedCount == walkables.size();
     }
 
-    public int getHeight()
-    {
+    public int getHeight() {
         return height;
     }
 
-    public int getWidth()
-    {
+    public int getWidth() {
         return width;
     }
-    
+
     private boolean validateEdgesSimple(List<PlayerHalfMapNode> nodes) {
 
-        if(!checkline(nodes,0,true,width)) return false;
-        if(!checkline(nodes,height - 1, true,width)) return false;
+        if (!checkline(nodes, 0, true, width))
+            return false;
+        if (!checkline(nodes, height - 1, true, width))
+            return false;
 
-        if(!checkline(nodes,0, false,height)) return false;
-        if(!checkline(nodes,width - 1 ,false,height)) return false;
+        if (!checkline(nodes, 0, false, height))
+            return false;
+        if (!checkline(nodes, width - 1, false, height))
+            return false;
         return true;
     }
-    
-    private boolean checkline(List<PlayerHalfMapNode> nodes, int fixed, boolean horizontal,int length){
+
+    private boolean checkline(List<PlayerHalfMapNode> nodes, int fixed, boolean horizontal, int length) {
         int accessible = 0;
         int water = 0;
-        for(PlayerHalfMapNode n: nodes)
-        {
+        for (PlayerHalfMapNode n : nodes) {
             boolean onLine = horizontal ? n.getY() == fixed : n.getX() == fixed;
-            if(!onLine) continue;
+            if (!onLine)
+                continue;
 
-            if(n.getTerrain() == ETerrain.Water) water++;
-            else accessible++;
-            
+            if (n.getTerrain() == ETerrain.Water)
+                water++;
+            else
+                accessible++;
+
         }
         int minAccessible = (int) Math.ceil(length * 0.40);
         int minWater = (int) Math.ceil(length * 0.20);
@@ -274,9 +295,12 @@ public class ClientMap {
     }
 }
 
-
-// Extended map borders ( Change Request ): The client has visited medieval fortresses and therefore desires stronger defensive measures. Therefore, the old rule regarding water at the map half edges is replaced by: 
+// Extended map borders ( Change Request ): The client has visited medieval
+// fortresses and therefore desires stronger defensive measures. Therefore, the
+// old rule regarding water at the map half edges is replaced by:
 // At least 40% of the fields on each edge of a map half must be accessible.
 // At least 20% of the fields on each edge of a map half must be inaccessible.
-// The client providing the second half of the map takes the other client's half into account as follows:
-// At least 40% of the fields on each edge must allow a successful switch from the new second half of the map to the previous first half.
+// The client providing the second half of the map takes the other client's half
+// into account as follows:
+// At least 40% of the fields on each edge must allow a successful switch from
+// the new second half of the map to the previous first half.

@@ -7,8 +7,12 @@ import messagesbase.messagesfromserver.GameState;
 
 public interface INetwork {
     public void registerPlayer(String studentId);
+
     public void sendHalfMap(PlayerHalfMap halfMap);
+
     public void sendMove(PlayerMove move);
+
     public GameState getGameState();
+
     public UniquePlayerIdentifier getPlayerId();
 }

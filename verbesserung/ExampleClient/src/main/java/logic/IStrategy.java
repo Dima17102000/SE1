@@ -1,4 +1,5 @@
 package logic;
+
 import messagesbase.messagesfromclient.PlayerMove;
 
 public interface IStrategy {

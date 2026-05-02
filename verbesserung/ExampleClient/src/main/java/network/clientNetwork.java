@@ -17,24 +17,22 @@ import reactor.core.publisher.Mono;
 import messagesbase.messagesfromserver.GameState;
 import messagesbase.messagesfromclient.PlayerMove;
 
-
-
-public class ClientNetwork implements INetwork{
+public class ClientNetwork implements INetwork {
 
     private static final int GAMESTATE_REQUEST_DELAY = 400;
-    
+
     // === Attribute ===
     private final String baseURL;
     private final String gameId;
     private UniquePlayerIdentifier playerId;
     private long lastPollTime = 0;
 
-    
     // === Konstruktor ===
     public ClientNetwork(String baseURL, String gameId) {
         this.baseURL = baseURL;
         this.gameId = gameId;
     }
+
     @Override
     public GameState getGameState() {
         delayForPolling();
@@ -48,7 +46,8 @@ public class ClientNetwork implements INetwork{
                 .method(HttpMethod.GET)
                 .uri("/" + gameId + "/states/" + playerId.getUniquePlayerID())
                 .retrieve()
-                .bodyToMono(new ParameterizedTypeReference<ResponseEnvelope<GameState>>() {});
+                .bodyToMono(new ParameterizedTypeReference<ResponseEnvelope<GameState>>() {
+                });
 
         ResponseEnvelope<GameState> result = webAccess.block();
 
@@ -109,7 +108,8 @@ public class ClientNetwork implements INetwork{
                 .uri("/" + gameId + "/halfmaps")
                 .body(BodyInserters.fromValue(halfMapData))
                 .retrieve()
-                .bodyToMono(new ParameterizedTypeReference<ResponseEnvelope<Object>>() {});
+                .bodyToMono(new ParameterizedTypeReference<ResponseEnvelope<Object>>() {
+                });
 
         ResponseEnvelope<Object> result = webAccess.block();
 
@@ -125,24 +125,25 @@ public class ClientNetwork implements INetwork{
         }
     }
 
-
     public void getGameStatus() {
         System.out.println("📥 Spielstatus wird abgefragt...");
     }
+
     @Override
     public void sendMove(PlayerMove move) {
         WebClient webClient = WebClient.builder()
-            .baseUrl(baseURL + "/games")
-            .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_XML_VALUE)
-            .defaultHeader(HttpHeaders.ACCEPT, MediaType.APPLICATION_XML_VALUE)
-            .build();
+                .baseUrl(baseURL + "/games")
+                .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_XML_VALUE)
+                .defaultHeader(HttpHeaders.ACCEPT, MediaType.APPLICATION_XML_VALUE)
+                .build();
 
         Mono<ResponseEnvelope<Object>> webAccess = webClient
-            .method(HttpMethod.POST)
-            .uri("/" + gameId + "/moves")
-            .body(BodyInserters.fromValue(move))
-            .retrieve()
-            .bodyToMono(new ParameterizedTypeReference<ResponseEnvelope<Object>>() {});
+                .method(HttpMethod.POST)
+                .uri("/" + gameId + "/moves")
+                .body(BodyInserters.fromValue(move))
+                .retrieve()
+                .bodyToMono(new ParameterizedTypeReference<ResponseEnvelope<Object>>() {
+                });
 
         ResponseEnvelope<Object> result = webAccess.block();
 
@@ -173,15 +174,15 @@ public class ClientNetwork implements INetwork{
 
     private void delayForPolling() {
         long now = System.currentTimeMillis();
-    
+
         if (lastPollTime == 0) {
             lastPollTime = now;
-            return; 
+            return;
         }
-    
+
         long elapsed = now - lastPollTime;
         long sleepTime = GAMESTATE_REQUEST_DELAY - elapsed;
-    
+
         if (sleepTime > 0) {
             try {
                 Thread.sleep(sleepTime);
@@ -190,9 +191,8 @@ public class ClientNetwork implements INetwork{
                 System.err.println("Sleep unterbrochen: " + e.getMessage());
             }
         }
-    
-       
+
         lastPollTime = System.currentTimeMillis();
     }
-    
+
 }

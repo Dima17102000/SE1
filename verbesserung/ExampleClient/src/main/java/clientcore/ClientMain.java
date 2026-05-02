@@ -49,7 +49,7 @@ public class ClientMain {
             if (state != null) {
                 Set<PlayerState> players = state.getPlayers();
                 for (PlayerState ps : players) {
-                    
+
                     if (ps.getUniquePlayerID().equals(myPlayerId)) {
                         String status = ps.getState().name();
                         System.out.println("🧍 Spieler-ID: " + myPlayerId);
@@ -76,10 +76,7 @@ public class ClientMain {
                 mapSent = true;
             }
 
-            
-
             System.out.println("⏳ Warte auf meinen Zug zum Senden der HalfMap...");
-            
 
             if (mapSent) {
                 break;
@@ -93,7 +90,7 @@ public class ClientMain {
     public void startMovePhase() {
         ConsoleView view = new ConsoleView();
         GameHelper gameHelper = new GameHelper(net.getPlayerId());
-    
+
         while (true) {
             GameState state = net.getGameState();
             boolean myTurnToMove = false;
@@ -104,7 +101,7 @@ public class ClientMain {
                     if (ps.getUniquePlayerID().equals(myPlayerId)) {
                         switch (ps.getState()) {
                             case MustAct -> myTurnToMove = true;
-                            //case MustWait -> myTurnToMove = false;
+                            // case MustWait -> myTurnToMove = false;
                             case Won -> {
                                 view.printGameResult(true);
                                 return;
@@ -118,10 +115,10 @@ public class ClientMain {
                     }
                 }
             }
-            //System.out.println("The value of variable myTurnTomove = " + myTurnToMove);
+            // System.out.println("The value of variable myTurnTomove = " + myTurnToMove);
             if (myTurnToMove) {
                 gameHelper.update(state);
-                view.render(gameHelper);  // 🗺️ Konsolenkarte ausgeben
+                view.render(gameHelper); // 🗺️ Konsolenkarte ausgeben
                 long t0 = System.nanoTime();
                 PlayerMove move = strategy.calculateNextMove(gameHelper);
                 long t1 = System.nanoTime();
@@ -132,8 +129,7 @@ public class ClientMain {
                     long t2 = System.nanoTime();
                     double dt2_1 = (t2 - t1) / 1000000;
                     System.out.println("Execution time of function sendMove takes in ms = " + dt2_1);
-                }
-                catch (Exception e) {
+                } catch (Exception e) {
                     long t2 = System.nanoTime();
                     double dt2_1 = (t2 - t1) / 1000000;
                     System.out.println("Execution time of function sendMove takes in ms = " + dt2_1);
@@ -142,44 +138,24 @@ public class ClientMain {
             } else {
                 System.out.println("⏳ Warte auf meinen Zug...");
             }
-    
-           
+
         }
     }
-    
 
     public static void main(String[] args) {
         INetwork network;
         String studentId = "kostarievd00"; // 🧑‍🎓 Deinen u:account hier einsetzen
 
-
         if (args.length < 3) {
             System.err.println("❗ Missing arguments. Required: [mode] [serverURL] [gameId]");
             return;
-        }
-        else{
+        } else {
             String gamemode = args[0];
             String serverURL = args[1];
             String gameId = args[2];
-            network = new ClientNetwork(serverURL,gameId);
+            network = new ClientNetwork(serverURL, gameId);
         }
         ClientMain main = new ClientMain(network);
         main.startGame(studentId);
     }
 }
-
-
-// 1 м = 100 см
-
-// 1 м = 1000 мм
-
-// 1 м = 10^9 нм
-
-// 5000 нм = 5000 * 10^-9 м = 5 * 10^-6 м
-
-
-// 1 с = 10^3 мс
-
-
-// 1 с = 10^9 нс
-

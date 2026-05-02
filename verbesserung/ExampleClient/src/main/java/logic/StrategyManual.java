@@ -4,8 +4,8 @@ import messagesbase.UniquePlayerIdentifier;
 import messagesbase.messagesfromclient.EMove;
 import messagesbase.messagesfromclient.PlayerMove;
 
-public class StrategyManual implements IStrategy{
-    
+public class StrategyManual implements IStrategy {
+
     @Override
     public PlayerMove calculateNextMove(GameHelper gameHelper) {
         UniquePlayerIdentifier playerId = gameHelper.getPlayerId();
@@ -24,7 +24,7 @@ public class StrategyManual implements IStrategy{
                 case 's' -> PlayerMove.of(playerId, EMove.Down);
                 case 'a' -> PlayerMove.of(playerId, EMove.Left);
                 case 'd' -> PlayerMove.of(playerId, EMove.Right);
-                default  -> {
+                default -> {
                     System.out.println("Неверный ввод, двигаюсь вправо по умолчанию.");
                     yield PlayerMove.of(playerId, EMove.Right);
                 }
@@ -34,6 +34,5 @@ public class StrategyManual implements IStrategy{
             return PlayerMove.of(playerId, EMove.Right);
         }
     }
-
 
 }

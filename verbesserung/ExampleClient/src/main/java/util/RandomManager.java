@@ -1,6 +1,5 @@
 package util;
 
-
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -20,7 +19,7 @@ public class RandomManager {
 
         currentSeed = System.currentTimeMillis();
         random = new Random(currentSeed);
-        if(printSeed){
+        if (printSeed) {
             System.out.println("[RandomManager] New random seed: " + currentSeed);
         }
     }
@@ -33,7 +32,6 @@ public class RandomManager {
         }
     }
 
-
     public static Random getRandom() {
 
         if (random == null) {
@@ -44,7 +42,7 @@ public class RandomManager {
 
     public static <T> T chooseRandom(List<T> items) {
         if (items == null || items.isEmpty()) {
-        return null;
+            return null;
         }
 
         List<T> sortedItems = new ArrayList<>(items);

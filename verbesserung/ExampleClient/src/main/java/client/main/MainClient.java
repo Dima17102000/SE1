@@ -5,7 +5,7 @@ import engine.GameSimulator;
 import util.RandomManager;
 
 public class MainClient {
-	
+
 	// ADDITIONAL TIPS ON THIS MATTER ARE GIVEN THROUGHOUT THE TUTORIAL SESSION!
 
 	/*
@@ -22,14 +22,14 @@ public class MainClient {
 	 * when and how.
 	 */
 	public static void main(String[] args) {
-		RandomManager.setSeed(1773484627773L);
-		// RandomManager.randomizeSeed();
+		// RandomManager.setSeed(1773484627773L);
+		RandomManager.randomizeSeed();
 		if (args.length < 3) {
 			GameSimulator.main(args);
 		} else {
 			ClientMain.main(args);
 		}
 
-    }
-	
+	}
+
 }
