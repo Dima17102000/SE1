@@ -77,10 +77,10 @@ public class Main {
 
   private static void setupLogging() {
     Logger root = Logger.getLogger("");
-    root.setLevel(Level.INFO);
+    root.setLevel(Level.FINER);
 
     for (var h : root.getHandlers()) {
-      h.setLevel(Level.FINE);
+      h.setLevel(Level.FINER);
 
       h.setFormatter(
           new Formatter() {
@@ -101,8 +101,8 @@ public class Main {
     }
 
     Logger.getLogger("controller").setLevel(Level.FINE);
-    Logger.getLogger("network").setLevel(Level.FINE);
-    Logger.getLogger("logic").setLevel(Level.FINE);
+    Logger.getLogger("network").setLevel(Level.FINER);
+    Logger.getLogger("logic").setLevel(Level.FINER);
     Logger.getLogger("map").setLevel(Level.FINE);
     Logger.getLogger("model").setLevel(Level.FINE);
     Logger.getLogger("view").setLevel(Level.FINE);

@@ -31,20 +31,20 @@ public class ClientNetwork extends AbstractDelayedNetwork implements INetwork {
 
   @Override
   public GameState getGameState() {
+    LOGGER.finer("Start of getGameState.");
     delayForPolling();
-    WebClient webClient =
-        WebClient.builder()
-            .baseUrl(baseURL + "/games")
-            .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_XML_VALUE)
-            .defaultHeader(HttpHeaders.ACCEPT, MediaType.APPLICATION_XML_VALUE)
-            .build();
+    WebClient webClient = WebClient.builder()
+        .baseUrl(baseURL + "/games")
+        .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_XML_VALUE)
+        .defaultHeader(HttpHeaders.ACCEPT, MediaType.APPLICATION_XML_VALUE)
+        .build();
 
-    Mono<ResponseEnvelope<GameState>> webAccess =
-        webClient
-            .method(HttpMethod.GET)
-            .uri("/" + gameId + "/states/" + playerId.getUniquePlayerID())
-            .retrieve()
-            .bodyToMono(new ParameterizedTypeReference<ResponseEnvelope<GameState>>() {});
+    Mono<ResponseEnvelope<GameState>> webAccess = webClient
+        .method(HttpMethod.GET)
+        .uri("/" + gameId + "/states/" + playerId.getUniquePlayerID())
+        .retrieve()
+        .bodyToMono(new ParameterizedTypeReference<ResponseEnvelope<GameState>>() {
+        });
 
     ResponseEnvelope<GameState> result = webAccess.block();
 
@@ -52,29 +52,28 @@ public class ClientNetwork extends AbstractDelayedNetwork implements INetwork {
       LOGGER.severe("Fehler beim Abrufen des Spielstatus: " + result.getExceptionMessage());
       return null;
     }
-
+    LOGGER.finer("State was successfully received.");
     return result.getData().get();
   }
 
   // === Registrierung implementiert ===
   @Override
   public void registerPlayer(String studentUAccount) {
-    WebClient webClient =
-        WebClient.builder()
-            .baseUrl(baseURL + "/games") // ❗ port NICHT nochmal anhängen
-            .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_XML_VALUE)
-            .defaultHeader(HttpHeaders.ACCEPT, MediaType.APPLICATION_XML_VALUE)
-            .build();
+    WebClient webClient = WebClient.builder()
+        .baseUrl(baseURL + "/games") // ❗ port NICHT nochmal anhängen
+        .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_XML_VALUE)
+        .defaultHeader(HttpHeaders.ACCEPT, MediaType.APPLICATION_XML_VALUE)
+        .build();
 
     PlayerRegistration playerReg = new PlayerRegistration("Dmytro", "Kostariev", studentUAccount);
 
-    Mono<ResponseEnvelope<UniquePlayerIdentifier>> webAccess =
-        webClient
-            .method(HttpMethod.POST)
-            .uri("/" + gameId + "/players")
-            .body(BodyInserters.fromValue(playerReg))
-            .retrieve()
-            .bodyToMono(new ParameterizedTypeReference<>() {});
+    Mono<ResponseEnvelope<UniquePlayerIdentifier>> webAccess = webClient
+        .method(HttpMethod.POST)
+        .uri("/" + gameId + "/players")
+        .body(BodyInserters.fromValue(playerReg))
+        .retrieve()
+        .bodyToMono(new ParameterizedTypeReference<>() {
+        });
 
     ResponseEnvelope<UniquePlayerIdentifier> result = webAccess.block();
 
@@ -91,22 +90,21 @@ public class ClientNetwork extends AbstractDelayedNetwork implements INetwork {
   // === Platzhalter-Methoden für später ===
   @Override
   public void sendHalfMap(PlayerHalfMap halfMapData) {
-    WebClient webClient =
-        WebClient.builder()
-            .baseUrl(baseURL + "/games")
-            .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_XML_VALUE)
-            .defaultHeader(HttpHeaders.ACCEPT, MediaType.APPLICATION_XML_VALUE)
-            .build();
+    WebClient webClient = WebClient.builder()
+        .baseUrl(baseURL + "/games")
+        .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_XML_VALUE)
+        .defaultHeader(HttpHeaders.ACCEPT, MediaType.APPLICATION_XML_VALUE)
+        .build();
 
     LOGGER.info("Sende HalfMap an den Server...");
 
-    Mono<ResponseEnvelope<Object>> webAccess =
-        webClient
-            .method(HttpMethod.POST)
-            .uri("/" + gameId + "/halfmaps")
-            .body(BodyInserters.fromValue(halfMapData))
-            .retrieve()
-            .bodyToMono(new ParameterizedTypeReference<ResponseEnvelope<Object>>() {});
+    Mono<ResponseEnvelope<Object>> webAccess = webClient
+        .method(HttpMethod.POST)
+        .uri("/" + gameId + "/halfmaps")
+        .body(BodyInserters.fromValue(halfMapData))
+        .retrieve()
+        .bodyToMono(new ParameterizedTypeReference<ResponseEnvelope<Object>>() {
+        });
 
     ResponseEnvelope<Object> result = webAccess.block();
 
@@ -128,20 +126,20 @@ public class ClientNetwork extends AbstractDelayedNetwork implements INetwork {
 
   @Override
   public void sendMove(PlayerMove move) {
-    WebClient webClient =
-        WebClient.builder()
-            .baseUrl(baseURL + "/games")
-            .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_XML_VALUE)
-            .defaultHeader(HttpHeaders.ACCEPT, MediaType.APPLICATION_XML_VALUE)
-            .build();
+    LOGGER.finer("start of sendMove");
+    WebClient webClient = WebClient.builder()
+        .baseUrl(baseURL + "/games")
+        .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_XML_VALUE)
+        .defaultHeader(HttpHeaders.ACCEPT, MediaType.APPLICATION_XML_VALUE)
+        .build();
 
-    Mono<ResponseEnvelope<Object>> webAccess =
-        webClient
-            .method(HttpMethod.POST)
-            .uri("/" + gameId + "/moves")
-            .body(BodyInserters.fromValue(move))
-            .retrieve()
-            .bodyToMono(new ParameterizedTypeReference<ResponseEnvelope<Object>>() {});
+    Mono<ResponseEnvelope<Object>> webAccess = webClient
+        .method(HttpMethod.POST)
+        .uri("/" + gameId + "/moves")
+        .body(BodyInserters.fromValue(move))
+        .retrieve()
+        .bodyToMono(new ParameterizedTypeReference<ResponseEnvelope<Object>>() {
+        });
 
     ResponseEnvelope<Object> result = webAccess.block();
 
