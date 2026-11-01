@@ -10,6 +10,7 @@ import java.util.logging.Formatter;
 import java.util.logging.Level;
 import java.util.logging.LogRecord;
 import java.util.logging.Logger;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import static org.junit.Assert.assertEquals;
@@ -88,9 +89,12 @@ public class GameHelperTest {
   }
 
   static Stream<EnemyPositionFunction> implementations() {
-    return Stream.of(
-        GameHelper::_getFirstTrueEnemyPosition_v2,
-        GameHelper::_getFirstTrueEnemyPosition_v3);
+    return IntStream.range(0, 10)
+        .boxed()
+        .flatMap(i -> Stream.<EnemyPositionFunction>of(
+            GameHelper::_getFirstTrueEnemyPosition_v2,
+            GameHelper::_getFirstTrueEnemyPosition_v3));
+
   }
 
   @Test
@@ -258,8 +262,7 @@ public class GameHelperTest {
         pos_2_real.getX() == pos_2_predicted_by_1.x && pos_2_real.getY() == pos_2_predicted_by_1.y);
   }
 
-  @RepeatedTest(3)
-  @ParameterizedTest
+  @ParameterizedTest(name = "[{index}]")
   @MethodSource("implementations")
   void FirstTrueEnemyPosition_v2(EnemyPositionFunction impl) {
     RandomManager.randomizeSeed();
