@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
-
 import messagesbase.messagesfromclient.ETerrain;
 import messagesbase.messagesfromclient.PlayerHalfMapNode;
 
@@ -38,8 +37,7 @@ public class MapValidator {
       }
     }
 
-    if (walkables.isEmpty())
-      return false;
+    if (walkables.isEmpty()) return false;
 
     Queue<PlayerHalfMapNode> queue = new LinkedList<>();
     PlayerHalfMapNode start = walkables.get(0);
@@ -53,7 +51,7 @@ public class MapValidator {
       int x = current.getX();
       int y = current.getY();
 
-      int[][] dirs = { { 1, 0 }, { -1, 0 }, { 0, 1 }, { 0, -1 } };
+      int[][] dirs = {{1, 0}, {-1, 0}, {0, 1}, {0, -1}};
       for (int[] d : dirs) {
         int nx = x + d[0];
         int ny = y + d[1];
@@ -78,15 +76,11 @@ public class MapValidator {
     int width = getMaxX(nodes) + 1;
     int height = getMaxY(nodes) + 1;
 
-    if (!checkline(nodes, 0, true, width))
-      return false;
-    if (!checkline(nodes, height - 1, true, width))
-      return false;
+    if (!checkline(nodes, 0, true, width)) return false;
+    if (!checkline(nodes, height - 1, true, width)) return false;
 
-    if (!checkline(nodes, 0, false, height))
-      return false;
-    if (!checkline(nodes, width - 1, false, height))
-      return false;
+    if (!checkline(nodes, 0, false, height)) return false;
+    if (!checkline(nodes, width - 1, false, height)) return false;
     return true;
   }
 
@@ -96,13 +90,10 @@ public class MapValidator {
     int water = 0;
     for (PlayerHalfMapNode n : nodes) {
       boolean onLine = horizontal ? n.getY() == fixed : n.getX() == fixed;
-      if (!onLine)
-        continue;
+      if (!onLine) continue;
 
-      if (n.getTerrain() == ETerrain.Water)
-        water++;
-      else
-        accessible++;
+      if (n.getTerrain() == ETerrain.Water) water++;
+      else accessible++;
     }
     int minAccessible = (int) Math.ceil(length * 0.51);
 

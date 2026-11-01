@@ -14,7 +14,6 @@ import java.util.PriorityQueue;
 import java.util.Set;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
-
 import messagesbase.messagesfromclient.EMove;
 import messagesbase.messagesfromclient.ETerrain;
 import messagesbase.messagesfromclient.PlayerMove;
@@ -29,8 +28,7 @@ public class StrategyPlannedTour implements IStrategy {
   private static final Logger LOGGER = Logger.getLogger(StrategyPlannedTour.class.getName());
   private List<FullMapNode> plannedTour = new LinkedList<>();
 
-  public StrategyPlannedTour() {
-  }
+  public StrategyPlannedTour() {}
 
   public List<FullMapNode> get_plannedTour() {
     return plannedTour;
@@ -81,24 +79,18 @@ public class StrategyPlannedTour implements IStrategy {
   /**
    * Skips mountain goals that are not useful for exploration.
    *
-   * <p>
-   * A mountain goal is considered useful only if it can reveal at least one
-   * remaining grass goal
-   * within distance sqrt(2). If the mountain is not useful, it is removed from
-   * the remaining goals
+   * <p>A mountain goal is considered useful only if it can reveal at least one remaining grass goal
+   * within distance sqrt(2). If the mountain is not useful, it is removed from the remaining goals
    * and the next closest goal is selected.
    *
-   * <p>
-   * Container goalsRemaining will be modified inplace in case mountain was
-   * rejected and next was
+   * <p>Container goalsRemaining will be modified inplace in case mountain was rejected and next was
    * recalculated.
    *
-   * @param next           current candidate goal
-   * @param current        current position from which the next goal is chosen
+   * @param next current candidate goal
+   * @param current current position from which the next goal is chosen
    * @param goalsRemaining mutable set of goals that still need to be covered
-   * @param gameHelper     helper used to search for the closest next goal
-   * @return the original goal if it is useful, the next useful goal, or null if
-   *         none exists
+   * @param gameHelper helper used to search for the closest next goal
+   * @return the original goal if it is useful, the next useful goal, or null if none exists
    */
   private FullMapNode skipUselessMountainGoals(
       FullMapNode next,
@@ -130,20 +122,15 @@ public class StrategyPlannedTour implements IStrategy {
   }
 
   /**
-   * Removes already covered goals after a path segment has been added to the
-   * tour.
+   * Removes already covered goals after a path segment has been added to the tour.
    *
-   * <p>
-   * Every node directly visited by the path is removed from goalsRemaining.
-   * Additionally, when
-   * the path visits a mountain node, nearby grass goals within observation
-   * distance are also
+   * <p>Every node directly visited by the path is removed from goalsRemaining. Additionally, when
+   * the path visits a mountain node, nearby grass goals within observation distance are also
    * removed, because they are considered observed from that mountain.
    *
-   * <p>
-   * Container goalsRemaining will be modified inplace.
+   * <p>Container goalsRemaining will be modified inplace.
    *
-   * @param path           path segment that was just added to the tour
+   * @param path path segment that was just added to the tour
    * @param goalsRemaining mutable set of goals that still need to be covered
    */
   private void updateGoalsRemainingAfterPath(
@@ -165,22 +152,17 @@ public class StrategyPlannedTour implements IStrategy {
   }
 
   /**
-   * Builds a continuous tour starting from the player's current position and
-   * forcing the tour to
+   * Builds a continuous tour starting from the player's current position and forcing the tour to
    * first try the given anchor goal.
    *
-   * <p>
-   * The method repeatedly chooses the next closest remaining goal, builds a path
-   * to it, removes
+   * <p>The method repeatedly chooses the next closest remaining goal, builds a path to it, removes
    * all goals covered by that path, and appends the path to the resulting tour.
    *
-   * <p>
-   * Mountain goals that do not help reveal nearby grass goals are skipped.
+   * <p>Mountain goals that do not help reveal nearby grass goals are skipped.
    *
-   * @param gameHelper helper that provides the current player position and map
-   *                   neighbours
-   * @param anchor     first goal candidate to try in the generated tour
-   * @param goals      all goal nodes that should be covered by the tour
+   * @param gameHelper helper that provides the current player position and map neighbours
+   * @param anchor first goal candidate to try in the generated tour
+   * @param goals all goal nodes that should be covered by the tour
    * @return continuous list of map nodes representing the generated tour
    */
   List<FullMapNode> generateFullTourThroughAnchor(
@@ -222,8 +204,7 @@ public class StrategyPlannedTour implements IStrategy {
      * 3. Tour covers goals
      */
 
-    if (tour == null || tour.size() < 2)
-      return 0.0;
+    if (tour == null || tour.size() < 2) return 0.0;
 
     Set<FullMapNode> visited = new HashSet<>();
     visited.add(tour.get(0)); // старт уже посещён
@@ -246,14 +227,12 @@ public class StrategyPlannedTour implements IStrategy {
 
       if (to.getTerrain() == ETerrain.Mountain) {
         for (FullMapNode neighbour : goals) {
-          if (neighbour.equals(to))
-            continue;
+          if (neighbour.equals(to)) continue;
 
           int dx = neighbour.getX() - to.getX();
           int dy = neighbour.getY() - to.getY();
 
-          if (dx * dx + dy * dy > 2)
-            continue;
+          if (dx * dx + dy * dy > 2) continue;
 
           int dxAbs = Math.abs(dx);
           int dyAbs = Math.abs(dy);
@@ -282,8 +261,7 @@ public class StrategyPlannedTour implements IStrategy {
      * 3. Tour covers goals
      */
 
-    if (tour == null || tour.size() < 2)
-      return 0.0;
+    if (tour == null || tour.size() < 2) return 0.0;
 
     Set<FullMapNode> visited = new HashSet<>();
     visited.add(tour.get(0)); // старт уже посещён
@@ -306,14 +284,12 @@ public class StrategyPlannedTour implements IStrategy {
 
       if (to.getTerrain() == ETerrain.Mountain) {
         for (FullMapNode neighbour : goals) {
-          if (neighbour.equals(to))
-            continue;
+          if (neighbour.equals(to)) continue;
 
           int dx = neighbour.getX() - to.getX();
           int dy = neighbour.getY() - to.getY();
 
-          if (dx * dx + dy * dy > 2)
-            continue;
+          if (dx * dx + dy * dy > 2) continue;
 
           if (!visited.contains(neighbour) && neighbour.getTerrain() == ETerrain.Grass) {
             List<FullMapNode> path = continiousPathBFS(to, neighbour, gameHelper, goals);
@@ -355,18 +331,20 @@ public class StrategyPlannedTour implements IStrategy {
     if (enemyPos == null) {
       return result;
     }
-    FullMapNode enemyNode = gameHelper.getMap().getMapNodes().stream()
-        .filter(n -> n.getX() == enemyPos.x && n.getY() == enemyPos.y)
-        .findFirst()
-        .orElse(null);
+    FullMapNode enemyNode =
+        gameHelper.getMap().getMapNodes().stream()
+            .filter(n -> n.getX() == enemyPos.x && n.getY() == enemyPos.y)
+            .findFirst()
+            .orElse(null);
 
     if (enemyNode == null) {
       return result;
     }
-    result = getNodesInRadius(enemyNode, 8, gameHelper).stream()
-        .filter(n -> !gameHelper.isObserved(n))
-        .filter(n -> gameHelper.insideEnemy(n))
-        .collect(Collectors.toSet());
+    result =
+        getNodesInRadius(enemyNode, 8, gameHelper).stream()
+            .filter(n -> !gameHelper.isObserved(n))
+            .filter(n -> gameHelper.insideEnemy(n))
+            .collect(Collectors.toSet());
     return result;
   }
 
@@ -412,10 +390,11 @@ public class StrategyPlannedTour implements IStrategy {
     }
 
     LOGGER.fine(
-        () -> "Goals collected: "
-            + goals.stream()
-                .map(g -> "(" + g.getX() + ", " + g.getY() + ") ")
-                .collect(Collectors.joining(" ")));
+        () ->
+            "Goals collected: "
+                + goals.stream()
+                    .map(g -> "(" + g.getX() + ", " + g.getY() + ") ")
+                    .collect(Collectors.joining(" ")));
     return goals;
   }
 
@@ -424,14 +403,10 @@ public class StrategyPlannedTour implements IStrategy {
     int dy = to.getY() - from.getY();
     assert dx * dx + dy * dy == 1;
 
-    if (to.getX() > from.getX())
-      return EMove.Right;
-    else if (to.getX() < from.getX())
-      return EMove.Left;
-    else if (to.getY() > from.getY())
-      return EMove.Down;
-    else
-      return EMove.Up;
+    if (to.getX() > from.getX()) return EMove.Right;
+    else if (to.getX() < from.getX()) return EMove.Left;
+    else if (to.getY() > from.getY()) return EMove.Down;
+    else return EMove.Up;
   }
 
   public FullMapNode closestByBFS(
@@ -462,8 +437,7 @@ public class StrategyPlannedTour implements IStrategy {
       Collections.shuffle(nbs, RandomManager.getRandom());
 
       for (FullMapNode nb : nbs) {
-        if (!isPassable(nb))
-          continue;
+        if (!isPassable(nb)) continue;
 
         int newCost = cur.cost + terrainTransitionCost(cur.node, nb);
 
@@ -507,16 +481,14 @@ public class StrategyPlannedTour implements IStrategy {
     while (!pq.isEmpty()) {
       PQItem cur = pq.poll();
 
-      if (cur.node.equals(finish))
-        break;
+      if (cur.node.equals(finish)) break;
 
       List<FullMapNode> nbs = gameHelper.getNeighbours4(cur.node);
       // Collections.shuffle(nbs);
       Collections.shuffle(nbs, RandomManager.getRandom());
 
       for (FullMapNode nb : nbs) {
-        if (!isPassable(nb))
-          continue;
+        if (!isPassable(nb)) continue;
 
         double reward = goals.contains(nb) ? -(1. / (goals.size() * 2)) : 0.0;
         int stepCost = terrainTransitionCost(cur.node, nb);
@@ -547,19 +519,15 @@ public class StrategyPlannedTour implements IStrategy {
   }
 
   /**
-   * Returns all map nodes that can be reached from the given center node with a
-   * total movement cost
+   * Returns all map nodes that can be reached from the given center node with a total movement cost
    * less than or equal to the given radius.
    *
-   * <p>
-   * Movement is calculated using 4-neighbour movement only. The cost of moving
-   * from one node to
+   * <p>Movement is calculated using 4-neighbour movement only. The cost of moving from one node to
    * another is the sum of both terrain costs: Grass = 1, Mountain = 2.
    *
    * @param center the start node of the radius search
    * @param radius the maximum allowed movement cost
-   * @return a set of all reachable nodes inside the given radius, including
-   *         center
+   * @return a set of all reachable nodes inside the given radius, including center
    */
   public Set<FullMapNode> getNodesInRadius(FullMapNode center, int radius, GameHelper gameHelper) {
     class PQItem {
@@ -606,12 +574,10 @@ public class StrategyPlannedTour implements IStrategy {
   /**
    * Calculates the movement cost between two directly adjacent nodes.
    *
-   * <p>
-   * The transition cost is the sum of terrain costs of both nodes: Grass = 1,
-   * Mountain = 2.
+   * <p>The transition cost is the sum of terrain costs of both nodes: Grass = 1, Mountain = 2.
    *
    * @param from the source node
-   * @param to   the directly adjacent target node
+   * @param to the directly adjacent target node
    * @return the movement cost between the two nodes
    */
   private int terrainTransitionCost(FullMapNode from, FullMapNode to) {

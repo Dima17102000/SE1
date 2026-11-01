@@ -1,6 +1,6 @@
 package model;
 
 public enum ViewType {
-    SWING,
-    CONSOLE
+  SWING,
+  CONSOLE
 }

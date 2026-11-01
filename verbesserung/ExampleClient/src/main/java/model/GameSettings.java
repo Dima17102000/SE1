@@ -33,19 +33,20 @@ public class GameSettings {
   }
 
   public static GameSettings getDefaultSettings() {
-    GameSettings defaults = new GameSettings(
-        "Fake1",
-        EGameMode.OFFLINE,
-        // StrategyType.PLANNED_TOUR,
-        // StrategyType.ALWAYS_CLOSEST,
-        // StrategyType.PLANNED_TOUR,
-        StrategyType.NEAREST_NEIGHBOUR,
-        StrategyType.NEAREST_NEIGHBOUR,
-        null,
-        null,
-        100,
-        null,
-        ViewType.SWING);
+    GameSettings defaults =
+        new GameSettings(
+            "Fake1",
+            EGameMode.OFFLINE,
+            // StrategyType.PLANNED_TOUR,
+            // StrategyType.ALWAYS_CLOSEST,
+            // StrategyType.PLANNED_TOUR,
+            StrategyType.NEAREST_NEIGHBOUR,
+            StrategyType.NEAREST_NEIGHBOUR,
+            null,
+            null,
+            100,
+            null,
+            ViewType.SWING);
     return defaults;
   }
 

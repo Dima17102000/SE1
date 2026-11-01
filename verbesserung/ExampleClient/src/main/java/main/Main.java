@@ -1,11 +1,10 @@
 package main;
 
+import controller.GameController;
 import java.util.logging.Formatter;
 import java.util.logging.Level;
 import java.util.logging.LogRecord;
 import java.util.logging.Logger;
-
-import controller.GameController;
 import model.EGameMode;
 import model.GameSettings;
 import model.Model;
@@ -50,10 +49,11 @@ public class Main {
     Model model = new Model();
     model.setSettings(settings);
 
-    IView view = switch (settings.getViewType()) {
-      case SWING -> new SwingView();
-      case CONSOLE -> new ConsoleView();
-    };
+    IView view =
+        switch (settings.getViewType()) {
+          case SWING -> new SwingView();
+          case CONSOLE -> new ConsoleView();
+        };
 
     GameController controller = new GameController(model, view);
     if (view instanceof SwingView swingView) {
@@ -70,7 +70,14 @@ public class Main {
     System.out.println(args[0]);
     System.out.println(args[1]);
     System.out.println(args[2]);
-    return new GameSettings("kostarievd00", EGameMode.ONLINE, StrategyType.PLANNED_TOUR, null, args[1], args[2], 400,
+    return new GameSettings(
+        "kostarievd00",
+        EGameMode.ONLINE,
+        StrategyType.PLANNED_TOUR,
+        null,
+        args[1],
+        args[2],
+        400,
         null,
         ViewType.CONSOLE);
   }

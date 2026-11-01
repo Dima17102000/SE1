@@ -11,7 +11,6 @@ import java.util.Queue;
 import java.util.Set;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
-
 import messagesbase.UniquePlayerIdentifier;
 import messagesbase.messagesfromclient.ETerrain;
 import messagesbase.messagesfromserver.EPlayerGameState;
@@ -131,8 +130,9 @@ public class GameHelper {
     FullMap map = currentGameState.getMap();
     return map.getMapNodes().stream()
         .filter(
-            n -> n.getPlayerPositionState() == EPlayerPositionState.BothPlayerPosition
-                || n.getPlayerPositionState() == EPlayerPositionState.MyPlayerPosition)
+            n ->
+                n.getPlayerPositionState() == EPlayerPositionState.BothPlayerPosition
+                    || n.getPlayerPositionState() == EPlayerPositionState.MyPlayerPosition)
         .findFirst()
         .orElse(null);
   }
@@ -141,8 +141,9 @@ public class GameHelper {
     FullMap map = currentGameState.getMap();
     return map.getMapNodes().stream()
         .filter(
-            n -> n.getPlayerPositionState() == EPlayerPositionState.BothPlayerPosition
-                || n.getPlayerPositionState() == EPlayerPositionState.EnemyPlayerPosition)
+            n ->
+                n.getPlayerPositionState() == EPlayerPositionState.BothPlayerPosition
+                    || n.getPlayerPositionState() == EPlayerPositionState.EnemyPlayerPosition)
         .findFirst()
         .orElse(null);
   }
@@ -173,8 +174,7 @@ public class GameHelper {
       int dx32 = p3.x - p2.x;
       int dy32 = p3.y - p2.y;
 
-      if (dx21 * dx21 + dy21 * dy21 <= 1
-          && dx32 * dx32 + dy32 * dy32 <= 1) {
+      if (dx21 * dx21 + dy21 * dy21 <= 1 && dx32 * dx32 + dy32 * dy32 <= 1) {
 
         firstTrueIndex = i - 2;
       } else {
@@ -191,8 +191,7 @@ public class GameHelper {
 
     class Validator {
       public boolean sufixIsValid(List<Point> points, int index) {
-        return transitionCostsAreValid(points, index) &&
-            terrainPatternIsValid(points, index);
+        return transitionCostsAreValid(points, index) && terrainPatternIsValid(points, index);
       }
 
       public boolean transitionCostsAreValid(List<Point> points, int index) {
@@ -234,7 +233,13 @@ public class GameHelper {
       public boolean terrainPatternIsValid(List<Point> points, int index) {
         class Automaton {
           enum State {
-            q0, q1, q2, q3, q4, q5, qF;
+            q0,
+            q1,
+            q2,
+            q3,
+            q4,
+            q5,
+            qF;
 
             public boolean isAccepting() {
               return (this == qF);
@@ -242,7 +247,10 @@ public class GameHelper {
           }
 
           enum Symbol {
-            sG, nG, sM, nM;
+            sG,
+            nG,
+            sM,
+            nM;
 
             public static Symbol getSymbol(ETerrain terrain, boolean hasChanged) {
               if (terrain == ETerrain.Grass) {
@@ -263,8 +271,7 @@ public class GameHelper {
             }
           }
 
-          private record Transition(State from, Symbol symbol) {
-          }
+          private record Transition(State from, Symbol symbol) {}
 
           private final Map<Transition, State> transitions = new HashMap<>();
 
@@ -324,7 +331,6 @@ public class GameHelper {
           if (automaton.isAccepting()) {
             return true;
           }
-
         }
         return false;
       }
@@ -354,16 +360,14 @@ public class GameHelper {
   public Point _getFirstTrueEnemyPosition_v3() {
     for (int i = NUM_HIDDEN_ROUNDS + 1; i < enemyPosHistory.size(); i++) {
       Point p = enemyPosHistory.get(i);
-      if (p.equals(enemyPosHistory.get(i - 1)))
-        continue;
+      if (p.equals(enemyPosHistory.get(i - 1))) continue;
 
       ETerrain t = getTerrain(p.x, p.y);
 
-      if (t != ETerrain.Grass && t != ETerrain.Mountain)
-        continue;
+      if (t != ETerrain.Grass && t != ETerrain.Mountain) continue;
 
-      boolean firstMove = (t == ETerrain.Grass && i % 2 == 0)
-          || (t == ETerrain.Mountain && i % 2 != 0);
+      boolean firstMove =
+          (t == ETerrain.Grass && i % 2 == 0) || (t == ETerrain.Mountain && i % 2 != 0);
 
       return enemyPosHistory.get(firstMove ? NUM_HIDDEN_ROUNDS : NUM_HIDDEN_ROUNDS - 1);
     }
@@ -451,14 +455,14 @@ public class GameHelper {
         if (node.getTerrain() == ETerrain.Mountain) {
 
           int[][] dirs = {
-              { 1, 0 },
-              { -1, 0 },
-              { 0, 1 },
-              { 0, -1 },
-              { 1, 1 },
-              { -1, 1 },
-              { -1, -1 },
-              { 1, -1 }
+            {1, 0},
+            {-1, 0},
+            {0, 1},
+            {0, -1},
+            {1, 1},
+            {-1, 1},
+            {-1, -1},
+            {1, -1}
           };
 
           for (int[] dir : dirs) {
@@ -495,8 +499,7 @@ public class GameHelper {
   }
 
   private void initialize() {
-    if (isInitialized)
-      return;
+    if (isInitialized) return;
 
     if (!DEBUG) {
       checkAllNodesAreReachable();
@@ -512,9 +515,10 @@ public class GameHelper {
      * Returns True if all Goals are reachable, returns False otherwise
      */
 
-    Set<FullMapNode> nodesLeft = getMap().getMapNodes().stream()
-        .filter(n -> n.getTerrain() != ETerrain.Water)
-        .collect(Collectors.toSet());
+    Set<FullMapNode> nodesLeft =
+        getMap().getMapNodes().stream()
+            .filter(n -> n.getTerrain() != ETerrain.Water)
+            .collect(Collectors.toSet());
     Set<FullMapNode> visited = new HashSet<>();
     Queue<FullMapNode> queue = new LinkedList<>();
 
@@ -634,12 +638,10 @@ public class GameHelper {
   /**
    * Calculates the movement cost between two directly adjacent nodes.
    *
-   * <p>
-   * The transition cost is the sum of terrain costs of both nodes: Grass = 1,
-   * Mountain = 2.
+   * <p>The transition cost is the sum of terrain costs of both nodes: Grass = 1, Mountain = 2.
    *
    * @param from the source node
-   * @param to   the directly adjacent target node
+   * @param to the directly adjacent target node
    * @return the movement cost between the two nodes
    */
   private int terrainTransitionCost(ETerrain from, ETerrain to) {

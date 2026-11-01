@@ -1,5 +1,6 @@
 package view;
 
+import controller.GameController;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
@@ -7,7 +8,6 @@ import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Graphics;
 import java.awt.GridLayout;
-
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
@@ -19,8 +19,6 @@ import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
-
-import controller.GameController;
 import logic.GameHelper;
 import messagesbase.messagesfromclient.ETerrain;
 import messagesbase.messagesfromserver.EFortState;
@@ -219,16 +217,17 @@ public class SwingView extends JFrame implements IView {
             fixedSeed = Long.parseLong(fixedSeedField.getText());
           }
 
-          GameSettings settings = new GameSettings(
-              studentIdField.getText(),
-              (EGameMode) gameModeBox.getSelectedItem(),
-              (StrategyType) playerStrategyBox.getSelectedItem(),
-              (StrategyType) enemyStrategyBox.getSelectedItem(),
-              serverURLField.getText(),
-              gameIdField.getText(),
-              delay,
-              fixedSeed,
-              ViewType.SWING);
+          GameSettings settings =
+              new GameSettings(
+                  studentIdField.getText(),
+                  (EGameMode) gameModeBox.getSelectedItem(),
+                  (StrategyType) playerStrategyBox.getSelectedItem(),
+                  (StrategyType) enemyStrategyBox.getSelectedItem(),
+                  serverURLField.getText(),
+                  gameIdField.getText(),
+                  delay,
+                  fixedSeed,
+                  ViewType.SWING);
 
           controller.updateSettings(settings);
 
@@ -302,8 +301,7 @@ public class SwingView extends JFrame implements IView {
   }
 
   public void showPauseMessage(String message) {
-    SwingUtilities.invokeLater(
-        () -> infoPanel.updatePauseMessage(message));
+    SwingUtilities.invokeLater(() -> infoPanel.updatePauseMessage(message));
   }
 
   @Override
@@ -319,11 +317,9 @@ public class SwingView extends JFrame implements IView {
 /**
  * GamePanel zeichnet die Karte.
  *
- * <p>
- * Gleicher Aufbau wie GamePanel im Minesweeper.
+ * <p>Gleicher Aufbau wie GamePanel im Minesweeper.
  *
- * <p>
- * Die Zellengröße wird dynamisch anhand der aktuellen Panelgröße berechnet.
+ * <p>Die Zellengröße wird dynamisch anhand der aktuellen Panelgröße berechnet.
  */
 class GamePanel extends JPanel {
 
@@ -619,9 +615,9 @@ class InfoPanel extends JPanel {
         statusLabel.setText("Enemy turn");
         break;
 
-      // default:
-      // statusLabel.setText("Game started");
-      // break;
+        // default:
+        // statusLabel.setText("Game started");
+        // break;
     }
 
     repaint();
