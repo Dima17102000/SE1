@@ -31,6 +31,7 @@ import messagesbase.messagesfromserver.PlayerState;
 import model.EGameMode;
 import model.GameSettings;
 import model.StrategyType;
+import model.ViewType;
 
 public class SwingView extends JFrame implements IView {
 
@@ -82,7 +83,7 @@ public class SwingView extends JFrame implements IView {
     revalidate();
   }
 
-  public void startNewGame() {
+  private void startNewGame() {
     gamePanel.clearMap();
 
     if (gamePanel.isEmpty()) {
@@ -124,9 +125,11 @@ public class SwingView extends JFrame implements IView {
         e -> {
           if (pauseButton.getText().equals("Pause")) {
             controller.pauseGame();
+            showPauseMessage("Game is paused");
             pauseButton.setText("Resume");
           } else {
             controller.resumeGame();
+            showPauseMessage("");
             pauseButton.setText("Pause");
           }
         });
@@ -224,7 +227,8 @@ public class SwingView extends JFrame implements IView {
               serverURLField.getText(),
               gameIdField.getText(),
               delay,
-              fixedSeed);
+              fixedSeed,
+              ViewType.SWING);
 
           controller.updateSettings(settings);
 
@@ -295,6 +299,11 @@ public class SwingView extends JFrame implements IView {
         () -> {
           infoPanel.updateMessage(message);
         });
+  }
+
+  public void showPauseMessage(String message) {
+    SwingUtilities.invokeLater(
+        () -> infoPanel.updatePauseMessage(message));
   }
 
   @Override
@@ -511,6 +520,7 @@ class InfoPanel extends JPanel {
   PlayerState state;
 
   private JLabel statusLabel;
+  private JLabel messageLabel;
 
   private JPanel leftPanel;
   private JPanel rightPanel;
@@ -533,10 +543,12 @@ class InfoPanel extends JPanel {
     enemyPlayerLabel.setFont(new Font("Segoe UI Emoji", Font.PLAIN, 40));
 
     statusLabel = new JLabel("Game started", SwingConstants.CENTER);
+    messageLabel = new JLabel("", SwingConstants.CENTER);
 
     statusLabel.setFont(new Font("SansSerif", Font.BOLD, 20));
-
-    statusLabel.setBorder(BorderFactory.createEmptyBorder(0, 20, 0, 0));
+    messageLabel.setFont(new Font("SansSerif", Font.BOLD, 20));
+    // messageLabel.setBorder(BorderFactory.createLineBorder(Color.GREEN, 4));
+    // statusLabel.setBorder(BorderFactory.createEmptyBorder(0, 20, 0, 0));
 
     leftPanel = new JPanel();
 
@@ -552,9 +564,18 @@ class InfoPanel extends JPanel {
 
     rightPanel.setPreferredSize(new Dimension(170, 60));
 
+    // JPanel centerPanel = new JPanel(new BorderLayout());
+
+    // centerPanel.add(leftPanel, BorderLayout.WEST);
+    // centerPanel.add(statusLabel, BorderLayout.CENTER);
+    // centerPanel.add(rightPanel, BorderLayout.EAST);
+
+    // add(centerPanel, BorderLayout.CENTER);
+
     add(leftPanel, BorderLayout.WEST);
     add(statusLabel, BorderLayout.CENTER);
     add(rightPanel, BorderLayout.EAST);
+    add(messageLabel, BorderLayout.SOUTH);
   }
 
   public void updatePlayerState(PlayerState state) {
@@ -637,6 +658,11 @@ class InfoPanel extends JPanel {
 
   public void updateMessage(String message) {
     statusLabel.setText(message);
+    repaint();
+  }
+
+  public void updatePauseMessage(String message) {
+    messageLabel.setText(message);
     repaint();
   }
 }
