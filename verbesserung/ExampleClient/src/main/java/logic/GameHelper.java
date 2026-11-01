@@ -45,6 +45,8 @@ public class GameHelper {
   private List<Point> playerPosHistory = new ArrayList<>();
   private List<Point> enemyPosHistory = new ArrayList<>();
 
+  private static final int NUM_HIDDEN_ROUNDS = 8;
+
   public GameHelper(UniquePlayerIdentifier playerId) {
     this.playerId = playerId;
   }
@@ -146,7 +148,7 @@ public class GameHelper {
   }
 
   public Point getFirstTrueEnemyPosition() {
-    return _getFirstTrueEnemyPosition_v1();
+    return _getFirstTrueEnemyPosition_v3();
   }
 
   public Point _getFirstTrueEnemyPosition_v1() {
@@ -199,7 +201,6 @@ public class GameHelper {
           return false;
         }
 
-
         int idx1 = index;
         int idx2 = idx1;
 
@@ -213,7 +214,7 @@ public class GameHelper {
           Point p1 = points.get(idx1);
           Point p2 = points.get(idx2);
           assert !p1.equals(p2);
-          
+
           if (!pointsAreAdjacent(p1, p2)) {
             return false;
           }
@@ -229,7 +230,7 @@ public class GameHelper {
 
         return true;
       }
-      
+
       public boolean terrainPatternIsValid(List<Point> points, int index) {
         class Automaton {
           enum State {
@@ -251,21 +252,22 @@ public class GameHelper {
                   return sG;
                 }
               } else if (terrain == ETerrain.Mountain) {
-              if (hasChanged) {
-                return nM;
-              } else {
-                return sM;
-              }
+                if (hasChanged) {
+                  return nM;
+                } else {
+                  return sM;
+                }
               } else {
                 return null;
               }
             }
           }
 
-          private record Transition(State from, Symbol symbol) {}
+          private record Transition(State from, Symbol symbol) {
+          }
 
           private final Map<Transition, State> transitions = new HashMap<>();
-          
+
           State state = State.q0;
 
           Automaton() {
@@ -277,7 +279,7 @@ public class GameHelper {
 
             transitions.put(new Transition(State.q2, Symbol.nG), State.qF);
             transitions.put(new Transition(State.q2, Symbol.sG), State.qF);
-              
+
             transitions.put(new Transition(State.q3, Symbol.sM), State.q4);
             transitions.put(new Transition(State.q3, Symbol.nM), State.qF);
 
@@ -286,17 +288,17 @@ public class GameHelper {
 
             transitions.put(new Transition(State.q5, Symbol.nM), State.qF);
           }
-          
+
           boolean step(ETerrain terrain, boolean hasChanged) {
             Symbol symbol = Symbol.getSymbol(terrain, hasChanged);
             return _step(symbol);
           }
-          
+
           boolean _step(Symbol symbol) {
             State next = transitions.get(new Transition(state, symbol));
 
             if (next == null) {
-                return false;
+              return false;
             }
 
             state = next;
@@ -309,7 +311,7 @@ public class GameHelper {
         }
 
         Automaton automaton = new Automaton();
-        
+
         for (int i = index; i < points.size(); i++) {
           Point p = points.get(i);
 
@@ -339,13 +341,32 @@ public class GameHelper {
     }
 
     Validator validator = new Validator();
-  
+
     for (int i = 0; i < enemyPosHistory.size(); i++) {
       if (validator.sufixIsValid(enemyPosHistory, i)) {
         return enemyPosHistory.get(i);
       }
     }
 
+    return null;
+  }
+
+  public Point _getFirstTrueEnemyPosition_v3() {
+    for (int i = NUM_HIDDEN_ROUNDS + 1; i < enemyPosHistory.size(); i++) {
+      Point p = enemyPosHistory.get(i);
+      if (p.equals(enemyPosHistory.get(i - 1)))
+        continue;
+
+      ETerrain t = getTerrain(p.x, p.y);
+
+      if (t != ETerrain.Grass && t != ETerrain.Mountain)
+        continue;
+
+      boolean firstMove = (t == ETerrain.Grass && i % 2 == 0)
+          || (t == ETerrain.Mountain && i % 2 != 0);
+
+      return enemyPosHistory.get(firstMove ? NUM_HIDDEN_ROUNDS : NUM_HIDDEN_ROUNDS - 1);
+    }
     return null;
   }
 
@@ -622,7 +643,7 @@ public class GameHelper {
    * @return the movement cost between the two nodes
    */
   private int terrainTransitionCost(ETerrain from, ETerrain to) {
-     int fromCost = (from == ETerrain.Mountain) ? 2 : 1;
+    int fromCost = (from == ETerrain.Mountain) ? 2 : 1;
     int toCost = (to == ETerrain.Mountain) ? 2 : 1;
     return fromCost + toCost;
   }
