@@ -6,9 +6,13 @@ import java.util.logging.LogRecord;
 import java.util.logging.Logger;
 
 import controller.GameController;
+import model.EGameMode;
 import model.GameSettings;
 import model.Model;
+import model.StrategyType;
+import model.ViewType;
 import util.RandomManager;
+import view.ConsoleView;
 import view.IView;
 import view.SwingView;
 
@@ -41,16 +45,34 @@ public class Main {
     // ClientMain.main(args);
     // }
 
-    IView view = new SwingView();
+    GameSettings settings = parseArguments(args);
 
     Model model = new Model();
-    GameSettings settings = GameSettings.getDefaultSettings();
     model.setSettings(settings);
 
+    IView view = switch (settings.getViewType()) {
+      case SWING -> new SwingView();
+      case CONSOLE -> new ConsoleView();
+    };
+
     GameController controller = new GameController(model, view);
-    ((SwingView) view).setController(controller);
+    if (view instanceof SwingView swingView) {
+      swingView.setController(controller);
+    }
     controller.startSession();
     // LockSupport.park();
+  }
+
+  private static GameSettings parseArguments(String[] args) {
+    if (args.length < 3) {
+      return GameSettings.getDefaultSettings();
+    }
+    System.out.println(args[0]);
+    System.out.println(args[1]);
+    System.out.println(args[2]);
+    return new GameSettings("kostarievd00", EGameMode.ONLINE, StrategyType.PLANNED_TOUR, null, args[1], args[2], 400,
+        null,
+        ViewType.CONSOLE);
   }
 
   private static void setupLogging() {

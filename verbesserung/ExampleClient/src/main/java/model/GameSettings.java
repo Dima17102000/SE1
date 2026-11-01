@@ -5,6 +5,7 @@ public class GameSettings {
   private EGameMode gameMode;
   private StrategyType playerStrategy;
   private StrategyType enemyStrategy;
+  private ViewType viewType;
   private String serverURL;
   private String gameId;
   private int delay;
@@ -18,11 +19,13 @@ public class GameSettings {
       String serverURL,
       String gameId,
       int delay,
-      Long fixedSeed) {
+      Long fixedSeed,
+      ViewType viewType) {
     this.studentId = studentId;
     this.gameMode = gameMode;
     this.playerStrategy = playerStrategy;
     this.enemyStrategy = enemyStrategy;
+    this.viewType = viewType;
     this.serverURL = serverURL;
     this.gameId = gameId;
     this.delay = delay;
@@ -30,19 +33,19 @@ public class GameSettings {
   }
 
   public static GameSettings getDefaultSettings() {
-    GameSettings defaults =
-        new GameSettings(
-            "Fake1",
-            EGameMode.OFFLINE,
-            // StrategyType.PLANNED_TOUR,
-            // StrategyType.ALWAYS_CLOSEST,
-            // StrategyType.PLANNED_TOUR,
-            StrategyType.NEAREST_NEIGHBOUR,
-            StrategyType.NEAREST_NEIGHBOUR,
-            null,
-            null,
-            100,
-            null);
+    GameSettings defaults = new GameSettings(
+        "Fake1",
+        EGameMode.OFFLINE,
+        // StrategyType.PLANNED_TOUR,
+        // StrategyType.ALWAYS_CLOSEST,
+        // StrategyType.PLANNED_TOUR,
+        StrategyType.NEAREST_NEIGHBOUR,
+        StrategyType.NEAREST_NEIGHBOUR,
+        null,
+        null,
+        100,
+        null,
+        ViewType.SWING);
     return defaults;
   }
 
@@ -72,5 +75,9 @@ public class GameSettings {
 
   public int getDelay() {
     return delay;
+  }
+
+  public ViewType getViewType() {
+    return viewType;
   }
 }
