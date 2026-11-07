@@ -2,22 +2,22 @@ package logic;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import engine.FakeEngine;
 import java.awt.Point;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
-import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.logging.Formatter;
 import java.util.logging.Level;
 import java.util.logging.LogRecord;
 import java.util.logging.Logger;
-import java.util.stream.IntStream;
-import java.util.stream.Stream;
+
+import org.junit.jupiter.api.RepeatedTest;
+import org.junit.jupiter.api.Test;
+
+import engine.FakeEngine;
 import map.ClientMap;
 import map.IMapGenerator;
 import messagesbase.UniquePlayerIdentifier;
@@ -32,12 +32,7 @@ import messagesbase.messagesfromserver.FullMap;
 import messagesbase.messagesfromserver.FullMapNode;
 import messagesbase.messagesfromserver.GameState;
 import messagesbase.messagesfromserver.PlayerState;
-import org.junit.jupiter.api.RepeatedTest;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.MethodSource;
 import util.RandomManager;
-import view.ConsoleView;
 
 public class GameHelperTest {
 
@@ -82,18 +77,6 @@ public class GameHelperTest {
 
     // Tests
     Logger.getLogger("logic.GameHelperTest").setLevel(Level.FINEST);
-  }
-
-  interface EnemyPositionFunction extends Function<GameHelper, Point> {}
-
-  static Stream<EnemyPositionFunction> implementations() {
-    return IntStream.range(0, 10)
-        .boxed()
-        .flatMap(
-            i ->
-                Stream.<EnemyPositionFunction>of(
-                    GameHelper::_getFirstTrueEnemyPosition_v2,
-                    GameHelper::_getFirstTrueEnemyPosition_v3));
   }
 
   @Test
@@ -212,69 +195,7 @@ public class GameHelperTest {
   }
 
   @RepeatedTest(100)
-  void FirstTrueEnemyPosition_v1() {
-
-    FakeEngine engine = new FakeEngine();
-
-    String playerId_1 = "player_1";
-    String playerId_2 = "player_2";
-
-    List<Supplier<IStrategy>> strategies =
-        List.of(
-            StrategyAlwaysClosest::new,
-            // StrategyNearestNeighbour::new,
-            StrategyPlannedTour::new);
-
-    IStrategy strategy_1 = RandomManager.chooseRandom(strategies).get();
-    IStrategy strategy_2 = RandomManager.chooseRandom(strategies).get();
-
-    IMapGenerator map_1 = new ClientMap();
-    PlayerHalfMap halfMapData_1 = map_1.generate("player1");
-    engine.registerPlayer(playerId_1, halfMapData_1);
-
-    IMapGenerator map_2 = new ClientMap();
-    PlayerHalfMap halfMapData_2 = map_2.generate("player2");
-    engine.registerPlayer(playerId_2, halfMapData_2);
-
-    GameHelper helper_1 = new GameHelper(new UniquePlayerIdentifier(playerId_1));
-
-    GameHelper helper_2 = new GameHelper(new UniquePlayerIdentifier(playerId_2));
-
-    Point pos_2_predicted_by_1 = null;
-
-    for (int i = 0; i < NUM_ROUNDS_HIDDEN && !engine.isFinished(); i++) {
-
-      GameState state_1 = engine.getState(playerId_1);
-      helper_1.update(state_1);
-
-      pos_2_predicted_by_1 = helper_1._getFirstTrueEnemyPosition_v1();
-      assertNull(pos_2_predicted_by_1);
-
-      PlayerMove move_1 = strategy_1.calculateNextMove(helper_1);
-      engine.applyMove(move_1);
-
-      GameState state_2 = engine.getState(playerId_2);
-      helper_2.update(state_2);
-
-      PlayerMove move_2 = strategy_2.calculateNextMove(helper_2);
-      engine.applyMove(move_2);
-    }
-    helper_1.update(engine.getState(playerId_1));
-    helper_2.update(engine.getState(playerId_2));
-
-    pos_2_predicted_by_1 = helper_1._getFirstTrueEnemyPosition_v1();
-
-    FullMapNode pos_2_real = helper_2.getMyPosition();
-
-    assertNotNull(pos_2_predicted_by_1);
-
-    assertTrue(
-        pos_2_real.getX() == pos_2_predicted_by_1.x && pos_2_real.getY() == pos_2_predicted_by_1.y);
-  }
-
-  @ParameterizedTest(name = "[{index}]")
-  @MethodSource("implementations")
-  void FirstTrueEnemyPosition_v2(EnemyPositionFunction impl) {
+  void FirstTrueEnemyPosition() {
     RandomManager.randomizeSeed();
     // RandomManager.setSeed(1791973700330L);
 
@@ -327,7 +248,6 @@ public class GameHelperTest {
     helper_2.update(engine.getState(playerId_2));
 
     FullMapNode pos_1_real = helper_1.getMyPosition();
-
     FullMapNode pos_2_real = helper_2.getMyPosition();
 
     for (; turnCount < NUM_ROUNDS_HIDDEN + 10 && !engine.isFinished(); turnCount++) {
@@ -358,10 +278,8 @@ public class GameHelperTest {
       return;
     }
 
-    // Point pos_1_predicted_by_2 = helper_2._getFirstTrueEnemyPosition_v3();
-    // Point pos_2_predicted_by_1 = helper_1._getFirstTrueEnemyPosition_v3();
-    Point pos_1_predicted_by_2 = impl.apply(helper_2);
-    Point pos_2_predicted_by_1 = impl.apply(helper_1);
+    Point pos_1_predicted_by_2 = helper_2.getFirstTrueEnemyPosition();
+    Point pos_2_predicted_by_1 = helper_1.getFirstTrueEnemyPosition();
     assertNotNull(pos_1_predicted_by_2);
     assertNotNull(pos_2_predicted_by_1);
 
@@ -433,82 +351,6 @@ public class GameHelperTest {
         pos_2_real.getX() == pos_2_predicted_by_1.x && pos_2_real.getY() == pos_2_predicted_by_1.y);
   }
 
-  @RepeatedTest(100)
-  public void FirstTrueEnemyPosition_v1_wihtBonusRounds() {
-
-    FakeEngine engine = new FakeEngine();
-
-    String playerId_1 = "player_1";
-    String playerId_2 = "player_2";
-
-    IStrategy strategy_1 = new StrategyPlannedTour();
-    IStrategy strategy_2 = new StrategyAlwaysClosest();
-
-    IMapGenerator mapGenerator_1 = new ClientMap();
-    PlayerHalfMap halfMapData_1 = mapGenerator_1.generate(playerId_1);
-    engine.registerPlayer(playerId_1, halfMapData_1);
-
-    IMapGenerator mapGenerator_2 = new ClientMap();
-    PlayerHalfMap halfMapData_2 = mapGenerator_2.generate(playerId_2);
-    engine.registerPlayer(playerId_2, halfMapData_2);
-
-    GameHelper helper_1 = new GameHelper(new UniquePlayerIdentifier(playerId_1));
-
-    GameHelper helper_2 = new GameHelper(new UniquePlayerIdentifier(playerId_2));
-
-    ConsoleView view = new ConsoleView();
-
-    for (int i = 0; i != NUM_ROUNDS_HIDDEN && !engine.isFinished(); i++) {
-
-      GameState state_1 = engine.getState(playerId_1);
-
-      helper_1.update(state_1);
-      view.render(helper_1);
-
-      if (i < NUM_ROUNDS_HIDDEN) {
-        Point Pos2_expected = helper_1._getFirstTrueEnemyPosition_v1();
-        assert (Pos2_expected == null);
-      }
-
-      PlayerMove move_1 = strategy_1.calculateNextMove(helper_1);
-      engine.applyMove(move_1);
-
-      GameState state_2 = engine.getState(playerId_2);
-      helper_2.update(state_2);
-      PlayerMove move_2 = strategy_2.calculateNextMove(helper_2);
-      engine.applyMove(move_2);
-    }
-
-    helper_1.update(engine.getState(playerId_1));
-    helper_2.update(engine.getState(playerId_2));
-
-    FullMapNode Pos2 = helper_2.getMyPosition();
-
-    // LOGGER.fine("Player2: " + Pos2.getX() + ", " + Pos2.getY());
-
-    for (int i = 0; ; i++) {
-
-      Point Pos2_expected = helper_1._getFirstTrueEnemyPosition_v1();
-
-      assertTrue(Pos2.getX() == Pos2_expected.x && Pos2.getY() == Pos2_expected.y);
-
-      if (engine.isFinished() || i == 6) {
-        break;
-      }
-
-      PlayerMove move_1 = strategy_1.calculateNextMove(helper_1);
-      engine.applyMove(move_1);
-
-      GameState state_2 = engine.getState(playerId_2);
-      helper_2.update(state_2);
-      PlayerMove move_2 = strategy_2.calculateNextMove(helper_2);
-      engine.applyMove(move_2);
-
-      GameState state_1 = engine.getState(playerId_1);
-      helper_1.update(state_1);
-      view.render(helper_1);
-    }
-  }
 
   /*
    * TestEnemyPositionTrackCorrectlyUnderMustWait
@@ -544,14 +386,14 @@ public class GameHelperTest {
    * ================ 8 turn passed
    * gamestate((0,0), map=1x100, enemyPos=random, mustWait)
    * gamestate((0,0), map=1x100, enemyPos=random, mustWait)
-   * gamestate((0,0), map=1x100, enemyPos=true=(1,99), mustAct)
+   * gamestate((0,0), map=1x100, enemyPos=true=(0,99), mustAct)
    * ================ 9 turn passed
    * gamestate((0,0), map=1x100, enemyPos=true=(0,99), mustWait)
    * gamestate((0,0), map=1x100, enemyPos=true=(0,99), mustWait)
-   * gamestate((0,0), map=1x100, enemyPos=true=(0,98), mustAct)
+   * gamestate((0,0), map=1x100, enemyPos=true=(0,99), mustAct)
    * ================ 10 turn passed
-   * gamestate((0,0), map=1x100, enemyPos=true=(0,98), mustWait)
-   * gamestate((0,0), map=1x100, enemyPos=true=(0,97), mustAct)
+   * gamestate((0,0), map=1x100, enemyPos=true=(0,99), mustWait)
+   * gamestate((0,0), map=1x100, enemyPos=true=(0,98), mustAct)
    *
    * ================ BREAK
    * posExpected = gamehelper.get_first_true_enemy_position()
@@ -685,17 +527,17 @@ public class GameHelperTest {
 
     helper.update(Factory.buildState(EPlayerGameState.MustWait, 99, "state26"));
 
-    helper.update(Factory.buildState(EPlayerGameState.MustAct, 98, "state27"));
+    helper.update(Factory.buildState(EPlayerGameState.MustAct, 99, "state27"));
 
     // ================= 10 TURNS PASSED
 
-    helper.update(Factory.buildState(EPlayerGameState.MustWait, 98, "state28"));
+    helper.update(Factory.buildState(EPlayerGameState.MustWait, 99, "state28"));
 
-    helper.update(Factory.buildState(EPlayerGameState.MustAct, 97, "state29"));
+    helper.update(Factory.buildState(EPlayerGameState.MustAct, 98, "state29"));
 
     // ================= BREAK
 
-    Point posExpected = helper._getFirstTrueEnemyPosition_v1();
+    Point posExpected = helper.getFirstTrueEnemyPosition();
 
     Point posTrue = new Point(0, 99);
 
