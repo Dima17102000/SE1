@@ -7,11 +7,13 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
+
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.RepeatedTest;
+
 import messagesbase.messagesfromclient.ETerrain;
 import messagesbase.messagesfromclient.PlayerHalfMap;
 import messagesbase.messagesfromclient.PlayerHalfMapNode;
-import org.junit.jupiter.api.Disabled;
-import org.junit.jupiter.api.RepeatedTest;
 
 public class ClientMapTest {
 
@@ -65,7 +67,6 @@ public class ClientMapTest {
     return passable * 1.0 / border.size() >= 0.51;
   }
 
-  @Disabled
   @RepeatedTest(100)
   void eachMapBorderHasAtLeast51PercentPassableTiles() {
     IMapGenerator map = new ClientMap();
@@ -102,6 +103,7 @@ public class ClientMapTest {
     return inaccessible * 1.0 / border.size() >= percent;
   }
 
+  @Disabled
   @RepeatedTest(100)
   void extendedBorderRulesAreSatisfied() {
     IMapGenerator map = new ClientMap();
